@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Exam Hours</title>
+    <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+    <header>
+        <h1>Admin — Exam Hours</h1>
+        <div class="token-bar">
+            <label>Token admin :
+                <input type="password" id="tokenInput" placeholder="dev-token">
+            </label>
+            <button id="saveToken">Enregistrer</button>
+            <span id="tokenStatus"></span>
+        </div>
+    </header>
+
+    <main>
+        <section>
+            <h2>Configurations</h2>
+            <div id="configsList" class="list">Chargement...</div>
+            <button id="newConfigBtn">+ Nouvelle config</button>
+        </section>
+
+        <section id="configFormSection" class="hidden">
+            <h2 id="configFormTitle">Nouvelle config</h2>
+            <form id="configForm">
+                <label>ID (unique, ex: maths-bac1)
+                    <input type="text" id="cfgId" required>
+                </label>
+                <label>Matière (ex: maths)
+                    <input type="text" id="cfgMatiere" required>
+                </label>
+                <label>Titre
+                    <input type="text" id="cfgTitre" required>
+                </label>
+                <label>Heure de fin (HH:MM)
+                    <input type="time" id="cfgFin" required>
+                </label>
+                <label>Heure de départ possible (HH:MM, vide si inutile)
+                    <input type="time" id="cfgDepart">
+                </label>
+                <label>Offset minutes (décalage fuseau)
+                    <input type="number" id="cfgOffset" value="0">
+                </label>
+                <label>Consignes (une par ligne)
+                    <textarea id="cfgConsignes" rows="6"></textarea>
+                </label>
+                <div class="actions">
+                    <button type="submit">Enregistrer</button>
+                    <button type="button" id="cancelConfig">Annuler</button>
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h2>FAQ</h2>
+            <label>Matière :
+                <input type="text" id="faqMatiere" placeholder="maths">
+            </label>
+            <button id="loadFaq">Charger</button>
+
+            <form id="faqForm">
+                <label>Question
+                    <input type="text" id="faqQuestion" required>
+                </label>
+                <label>Réponse
+                    <textarea id="faqReponse" rows="2" required></textarea>
+                </label>
+                <button type="submit">Ajouter</button>
+            </form>
+
+            <div id="faqList" class="list"></div>
+        </section>
+
+        <p id="message" class="message"></p>
+    </main>
+
+    <script src="/admin.js"></script>
+</body>
+</html>

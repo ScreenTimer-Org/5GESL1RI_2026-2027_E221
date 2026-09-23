@@ -1,0 +1,14 @@
+{
+  "name": "exam-hours",
+  "version": "1.0.0",
+  "description": "Affichage des horaires d'examen",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node --experimental-sqlite server.js",
+    "seed": "node --experimental-sqlite seed.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

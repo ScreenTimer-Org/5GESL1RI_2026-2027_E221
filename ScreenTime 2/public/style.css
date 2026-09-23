@@ -1,0 +1,182 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: #0b0b0b;
+    color: #fff;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+main { max-width: 1400px; margin: 0 auto; }
+
+h1 {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.timer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.timer div {
+    background: #1a1a1a;
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+}
+
+.timer p {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 0.5rem;
+}
+
+.timer span {
+    font-size: 6rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.depart {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #ffcc00;
+    margin-bottom: 2rem;
+    min-height: 2rem;
+}
+
+.rotation {
+    background: #1a1a1a;
+    border-radius: 1rem;
+    padding: 2rem;
+    min-height: 300px;
+}
+
+.panel h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #4da6ff;
+}
+
+.panel ul {
+    list-style: none;
+    font-size: 1.6rem;
+    line-height: 1.6;
+}
+
+.panel li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #333;
+}
+
+.panel li:last-child { border-bottom: none; }
+
+.panel li .q {
+    color: #4da6ff;
+    font-weight: bold;
+}
+
+.panel li .r {
+    color: #ddd;
+}
+
+.hidden { display: none; }
+
+.error {
+    color: #ff5555;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+}
+
+.settings-btn {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.settings-btn:hover { background: #333; }
+
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    max-width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-left: 1px solid #333;
+    padding: 1.5rem;
+    z-index: 200;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.5);
+}
+
+.settings-panel h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.settings-panel .hint {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 1.5rem;
+}
+
+.settings-panel label {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.settings-panel input,
+.settings-panel textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    background: #0b0b0b;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.settings-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.settings-actions button {
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: #0066cc;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.settings-actions button:hover { background: #0055aa; }
+#resetOverrides { background: #cc0000; }
+#resetOverrides:hover { background: #aa0000; }
+#closeSettings { background: #444; }
+#closeSettings:hover { background: #555; }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Hours</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <main>
+        <h1 id="titre">Chargement...</h1>
+
+        <section class="timer">
+            <div>
+                <p>Heure courante</p>
+                <span id="currentTimer">--:--</span>
+            </div>
+            <div>
+                <p>Fin de l'épreuve</p>
+                <span id="endTimer">--:--</span>
+            </div>
+            <div>
+                <p>Il vous reste</p>
+                <span id="remainingTimer">--:--</span>
+            </div>
+        </section>
+
+        <p id="departMsg" class="depart"></p>
+
+        <section id="rotation" class="rotation">
+            <div id="panelConsignes" class="panel">
+                <h2>Consignes</h2>
+                <ul id="consignesList"></ul>
+            </div>
+            <div id="panelFaq" class="panel hidden">
+                <h2>FAQ</h2>
+                <ul id="faqList"></ul>
+            </div>
+        </section>
+
+        <p id="error" class="error hidden"></p>
+    </main>
+
+    <button id="settingsBtn" class="settings-btn" title="Paramètres locaux">⚙️</button>
+
+    <div id="settingsPanel" class="settings-panel hidden">
+        <h2>Paramètres locaux</h2>
+        <p class="hint">Ces modifications ne s'appliquent qu'à cet appareil, et ne sont pas partagées.</p>
+
+        <label>Titre
+            <input type="text" id="ovTitre">
+        </label>
+        <label>Heure de fin (HH:MM)
+            <input type="time" id="ovFin">
+        </label>
+        <label>Heure de départ (HH:MM, vide si inutile)
+            <input type="time" id="ovDepart">
+        </label>
+        <label>Offset minutes
+            <input type="number" id="ovOffset">
+        </label>
+        <label>Consignes (une par ligne)
+            <textarea id="ovConsignes" rows="6"></textarea>
+        </label>
+
+        <div class="settings-actions">
+            <button id="saveOverrides">Enregistrer</button>
+            <button id="resetOverrides">Tout réinitialiser</button>
+            <button id="closeSettings">Fermer</button>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+
+</html>
