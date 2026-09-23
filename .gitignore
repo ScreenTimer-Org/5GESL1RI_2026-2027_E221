@@ -1,0 +1,28 @@
+# Dépendances
+node_modules/
+
+# DB locale
+data.db
+data.db-journal
+data.db-wal
+data.db-shm
+
+# VS code
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.cache
+
+# Build et cache
+dist/
+build/
+.cache/
+.npm/
+
+# Environnement
+.env
+.env.local
+.env.*.local
