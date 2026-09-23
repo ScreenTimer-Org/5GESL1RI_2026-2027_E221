@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Screen Timer · tests</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; }
+    li.ok { color: #15803d; }
+    li.ko { color: #c62828; font-weight: 600; }
+    #summary { font-size: 20px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <p id="summary"></p>
+  <ul id="list"></ul>
+  <script src="../js/markdown.js"></script>
+  <script src="../js/faq.js"></script>
+  <script src="../js/timer.js"></script>
+  <script src="../js/config.js"></script>
+  <script src="tests.js"></script>
+  <script>
+    const res = ST.testResults;
+    const failed = res.filter((r) => !r.ok);
+    document.getElementById('summary').textContent =
+      (failed.length ? '✗ ' : '✓ ') + (res.length - failed.length) + ' / ' + res.length + ' tests OK';
+    document.getElementById('list').innerHTML = res
+      .map((r) => '<li class="' + (r.ok ? 'ok' : 'ko') + '">' + ST.markdown.escapeHtml(r.name + (r.error ? ' — ' + r.error : '')) + '</li>')
+      .join('');
+  </script>
+</body>
+</html>

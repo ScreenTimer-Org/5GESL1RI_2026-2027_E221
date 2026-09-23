@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screen Timer</title>
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="screen" class="screen" title="Cliquer (ou touche C) pour configurer">
+    <header class="banner">
+      <img id="logo" class="logo" alt="" hidden>
+      <span id="code" class="code" hidden></span>
+      <h1 id="title" class="title"></h1>
+      <span id="room" class="room" hidden></span>
+      <div class="now">
+        <span class="now-label">Heure</span>
+        <span id="clock" class="now-clock">--:--</span>
+      </div>
+    </header>
+
+    <div id="body" class="body">
+      <section id="side" class="side">
+        <article id="consignesCard" class="card consignes">
+          <h2>Consignes</h2>
+          <div id="consignes" class="md"></div>
+        </article>
+        <article id="faqCard" class="card faq">
+          <h2>FAQ <span id="faqCount" class="faq-count"></span></h2>
+          <div id="faqItem" class="faq-item">
+            <p class="faq-q"><span id="faqNew" class="badge" hidden>Nouveau</span><span id="faqQ"></span></p>
+            <div id="faqA" class="faq-a md"></div>
+          </div>
+          <div id="faqDots" class="faq-dots" aria-hidden="true"></div>
+        </article>
+      </section>
+
+      <section id="timer" class="timer">
+        <p id="phaseLabel" class="phase-label"></p>
+        <p id="countdown" class="countdown">--</p>
+        <div id="progress" class="progress" hidden><div id="progressBar" class="progress-bar"></div></div>
+        <p id="leaveInfo" class="leave-info" hidden></p>
+        <dl class="times">
+          <div id="startBox"><dt>Début</dt><dd id="startTime"></dd></div>
+          <div id="endBox"><dt id="endLabel">Fin</dt><dd id="endTime"></dd></div>
+          <div id="leaveBox"><dt>Sortie dès</dt><dd id="leaveTime"></dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <footer class="footer">
+      <span id="syncStatus"></span>
+      <span class="hint">C : configurer · F : plein écran · ← → : FAQ</span>
+    </footer>
+  </main>
+
+  <aside id="panel" class="panel" hidden aria-label="Configuration">
+    <div class="panel-head">
+      <h2>Configuration</h2>
+      <button type="button" id="closePanel" class="btn">Fermer</button>
+    </div>
+    <p class="panel-intro">
+      Les réglages marqués <span class="tag">local</span> ne concernent que cet écran.
+      Toute modification est enregistrée dans ce navigateur. Elle reste locale et n'est pas envoyée aux autres locaux.
+    </p>
+    <form id="form" class="form" autocomplete="off"></form>
+
+    <section class="share">
+      <h3>FAQ partagée (pad)</h3>
+      <p class="help">Les profs écrivent la FAQ dans un <strong>pad</strong> (document Etherpad modifiable à plusieurs) :
+        envoyez-leur son lien. Tous les écrans de l'épreuve l'affichent en quelques secondes.</p>
+      <label class="field">
+        <span class="field-label">Lien du pad, à envoyer aux profs</span>
+        <input id="padUrl" type="url" placeholder="https://quotidien.framapad.org/p/…">
+      </label>
+      <div class="row">
+        <button type="button" id="createPad" class="btn primary">Créer un nouveau pad</button>
+        <button type="button" id="usePad" class="btn">Utiliser ce lien</button>
+        <button type="button" id="copyPad" class="btn" hidden>Copier</button>
+        <a id="openPad" class="btn" target="_blank" rel="noopener" hidden>Ouvrir le pad</a>
+      </div>
+      <p id="faqStatus" class="help"></p>
+      <p id="faqError" class="help warn-text" hidden></p>
+      <details class="howto">
+        <summary>Comment écrire dans le pad</summary>
+        <pre>Peut-on utiliser une calculatrice ?
+Non.
+
+Question 3 : faut-il gérer une liste vide ?
+Oui, renvoyez 0.</pre>
+        <p class="help">Un paragraphe par question : la 1<sup>re</sup> ligne, terminée par « ? », est la question ;
+          les lignes suivantes sont la réponse (on peut l'ajouter plus tard). Une ligne vide entre deux questions.
+          Le texte d'accueil du pad est ignoré.</p>
+      </details>
+    </section>
+
+    <section class="share">
+      <h3>Lien à partager aux surveillants</h3>
+      <p class="help">Même épreuve, mêmes consignes et même FAQ dans tous les locaux ; chaque local peut ensuite ajuster
+        ses heures. Ce lien ne contient pas le lien du pad.</p>
+      <textarea id="shareLink" readonly rows="4"></textarea>
+      <div class="row">
+        <button type="button" id="copyLink" class="btn primary">Copier le lien</button>
+        <a id="openLink" class="btn" target="_blank" rel="noopener">Ouvrir dans un nouvel onglet</a>
+      </div>
+      <p id="shareWarning" class="help warn-text" hidden>La page est ouverte en fichier local : lancez « python3 server.py »
+        pour que le lien et la FAQ fonctionnent.</p>
+    </section>
+
+    <details class="more">
+      <summary>Affichage</summary>
+      <form id="formMore" class="form" autocomplete="off"></form>
+    </details>
+
+    <div class="row panel-foot">
+      <button type="button" id="resetLocal" class="btn danger">Annuler les modifications locales</button>
+      <button type="button" id="fullscreen" class="btn">Plein écran</button>
+    </div>
+  </aside>
+
+  <script src="js/markdown.js"></script>
+  <script src="js/faq.js"></script>
+  <script src="js/timer.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/screen.js"></script>
+  <script src="js/panel.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

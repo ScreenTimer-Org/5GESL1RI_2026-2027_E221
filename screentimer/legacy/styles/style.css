@@ -1,0 +1,80 @@
+* {
+  box-sizing: border-box; }
+
+body {
+  font-family: sans-serif;
+  padding: 30px; }
+
+table {
+  margin: 0 auto;
+  text-align: center;
+  border: 0;
+  vertical-align: top;
+  transform-origin: 50% 0;
+  cursor: pointer; }
+  table td {
+    padding: 0px; }
+    table td:first-child {
+      vertical-align: top;
+      width: 50%; }
+      table td:first-child img {
+        height: 70px; }
+      table td:first-child ul, table td:first-child h5 {
+        text-align: left; }
+    table td:nth-child(2) {
+      vertical-align: middle; }
+      table td:nth-child(2) table td {
+        padding: 10px 30px; }
+      table td:nth-child(2) > *:not(:first-child) {
+        padding-top: 40px; }
+
+.tdsmall {
+  font-size: 70%; }
+
+.small {
+  font-size: 40%; }
+
+.overlay {
+  position: absolute;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); }
+
+form {
+  position: absolute;
+  left: 50%;
+  top: 50px;
+  transform: translateX(-50%);
+  background-color: white;
+  margin: 0 auto;
+  padding: 20px; }
+  form textarea, form input {
+    width: 500px; }
+
+.clickToConfig {
+  background-color: #6dc0d0;
+  color: white;
+  position: absolute;
+  padding: 10px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0%);
+  top: 5px;
+  transition: all 0.5s ease;
+  overflow: hidden;
+  pointer-events: none; }
+  .clickToConfig.hide {
+    transform: translateX(-50%) translateY(-200%);
+    display: block; }
+
+.clock {
+  font-size: 400%; }
+
+.credits {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 70%; }

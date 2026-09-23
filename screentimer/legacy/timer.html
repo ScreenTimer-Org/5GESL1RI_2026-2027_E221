@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="tools/pure-min.css" rel="stylesheet" type="text/css">
+    <link href="styles/style.css" rel="stylesheet" type="text/css">
+    <title>Timer</title>
+  </head>
+  <body>
+    <div
+      v-if="!configOpen"
+      :class="{hide: hiddenMessage}"
+      class="clickToConfig"
+    >
+      Cliquer pour configurer
+    </div>
+
+    <table @click="toggleConfig" @mousemove="mousemove" v-el:table>
+      <tr>
+        <td class="tdsmall">
+          <img src="ch1.png">
+          <h2>{{Titre}}</h2>
+          <h5 v-if="consignes">Consignes</h5>
+          <ul id="consignes" v-if="consignes">
+            <li v-for="consigne in consigneLines" v-if="consigne" track-by="$index">
+              {{{consigne}}}
+            </li>
+          </ul>
+        </td>
+
+        <td>
+          <table class="small">
+            <tr>
+              <td>
+                Début
+                <div class="clock">{{clock}}</div>
+              </td>
+              <td>
+                Fin 
+                <div class="clock">{{endTime}}</div>
+              </td>
+            </tr>
+          </table>
+
+          <div v-if="!isFinished">
+            Il reste
+            <div class="clock">{{remainTime}}</div>
+          </div>
+
+          <div v-if="isFinished">
+            <h2>FINI</h2>
+          </div>
+
+          <div v-if="leaveTime && !canLeave" class="small">
+            Vous ne pouvez partir qu'après
+            <div class="clock">{{leaveTime}}</div>
+          </div>
+
+          <div v-if="leaveTime && canLeave" class="small">
+            <h5>Vous êtes désormais libres de partir !</h5>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="credits">Par entreprise E221</div>
+
+    <div v-if="configOpen" class="overlay"></div>
+
+    <form v-if="configOpen" class="pure-form pure-form-stacked">
+      <fieldset>
+        <legend>Configuration</legend>
+
+        <label>Heure de fin (HH:MM)</label>
+        <input v-model="endTime">
+
+        <label>Heure de départ possible (HH:MM, vide si inutile)</label>
+        <input v-model="leaveTime">
+
+        <label>Titre de l'épreuve</label>
+        <input v-model="title">
+
+        <label>Consignes (un item par ligne, html accepté)</label>
+        <textarea v-model="consignes" rows="15"></textarea>
+
+        <label>Minutes de décallage de l'heure du PC ({{clock}})</label>
+        <input v-model="deltaTime">
+
+        <label>Zoom manuel ({{manualScale}}x)</label>
+        <input type="range" v-model="manualScale" min="0.1" max="2" step="0.01">
+
+        <hr>
+        <a @click="toggleConfig" class="pure-button pure-button-primary stop">Terminer</a>
+      </fieldset>
+    </form>
+
+    <script src="tools/vue.1.0.11.js"></script>
+    <script src="scripts/script.js"></script>
+  </body>
+</html>
