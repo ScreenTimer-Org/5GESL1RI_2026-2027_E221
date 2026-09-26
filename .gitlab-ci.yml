@@ -8,7 +8,7 @@ build_job:
       - cd screentimer
     script:
       - bun install --frozen-lockfile
-      - bun run build script:
+      - bun run build
 
 package_job:
     stage: package
