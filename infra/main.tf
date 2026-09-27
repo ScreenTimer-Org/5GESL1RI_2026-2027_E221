@@ -17,11 +17,11 @@ locals {
   resource_group_location = "westeurope"
   location                = "spaincentral"
 
-  resource_group_name            = "rg-screentimer-221"
-  container_registry_name        = "acrscreentimer221"
-  log_analytics_name             = "log-screentimer-221"
-  container_app_environment_name = "cae-screentimer-221"
-  container_app_name             = "ca-screentimer-221"
+  resource_group_name            = "rg-screentimer-221-2"
+  container_registry_name        = "acrscreentimer2212"
+  log_analytics_name             = "log-screentimer-221-2"
+  container_app_environment_name = "cae-screentimer-221-2"
+  container_app_name             = "ca-screentimer-221-2"
 
   tags = {
     project     = "screentimer"
@@ -62,6 +62,24 @@ resource "azurerm_container_app_environment" "main" {
   logs_destination           = "log-analytics"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   tags                       = local.tags
+
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
+}
+
+resource "azurerm_user_assigned_identity" "acr_pull" {
+  name                 = "id-screentimer-acrpull"
+  resource_group_name  = azurerm_resource_group.main.name
+  location             = local.location
+  tags                 = local.tags
+}
+
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = azurerm_container_registry.main.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.acr_pull.principal_id
 }
 
 resource "azurerm_container_app" "placeholder" {
@@ -69,15 +87,26 @@ resource "azurerm_container_app" "placeholder" {
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
   revision_mode                = "Single"
+  workload_profile_name        = "Consumption"
   tags                         = local.tags
+
+  identity {
+    type = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.acr_pull.id]
+  }
+
+  registry {
+    server   = azurerm_container_registry.main.login_server
+    identity = azurerm_user_assigned_identity.acr_pull.id
+  }
 
   template {
     min_replicas = 0
     max_replicas = 1
 
     container {
-      name   = "nginx"
-      image  = "nginx:alpine"
+      name   = "screentimer"
+      image  = "acrscreentimer2212.azurecr.io/screentimer:latest"
       cpu    = 0.25
       memory = "0.5Gi"
     }
@@ -85,7 +114,7 @@ resource "azurerm_container_app" "placeholder" {
 
   ingress {
     external_enabled = true
-    target_port      = 80
+    target_port      = 8080
 
     traffic_weight {
       latest_revision = true
@@ -93,6 +122,7 @@ resource "azurerm_container_app" "placeholder" {
     }
   }
 }
+
 
 output "resource_group_name" {
   value = azurerm_resource_group.main.name
