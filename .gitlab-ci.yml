@@ -12,7 +12,7 @@ build_job:
 
 package_job:
     stage: package
-    image: docker:29.8.1-dind-alpine3.24
+    image: docker:24-dind
     services:
       - docker:24-dind
     variables:
