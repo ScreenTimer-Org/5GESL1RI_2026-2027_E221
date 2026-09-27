@@ -1,6 +1,6 @@
 # Screen Timer - Déploiement Azure
 
-## Ce qu'on a mis en place
+## Mise en place 
 
 L'application tourne sur Azure Container Apps, dans le groupe rg-screentimer-221-2.
 L'image Docker est stockée sur l'ACR acrscreentimer2212.azurecr.io.
