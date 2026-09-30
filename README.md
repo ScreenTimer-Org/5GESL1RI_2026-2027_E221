@@ -91,3 +91,29 @@ For open source projects, say how it is licensed.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+
+
+## Contribution de Maxime — Matricule et statut
+
+Branche : qr-matricule-statut
+
+### Réalisé
+
+- Ajout du champ de saisie du matricule.
+- Ajout du bouton Valider.
+- Stockage du matricule dans une variable JavaScript.
+- Validation sans rechargement de la page.
+- Ajout de la fonction afficherStatut(autorise).
+- Affichage Autorisé en vert et Non autorisé en rouge.
+
+### Vérifications
+
+- Saisir un matricule et vérifier sa valeur dans la console.
+- Si le matricule est dans la liste fournie et pré-enregistrer on appelle afficherStatut(true) sinon afficherStatut(false)
+- Appeler afficherStatut(true) pour vérifier le statut vert.
+- Appeler afficherStatut(false) pour vérifier le statut rouge.
+
+### Intégration restante
+
+- Relier la validation du formulaire à la liste de matricules vérifié fournie par notre suppérieur.
+- Préparer les appels à logEvent() avec l’intégration de l’historique.
