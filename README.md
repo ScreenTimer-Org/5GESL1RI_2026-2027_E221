@@ -22,13 +22,17 @@ ni ne le stocke.
 - Installation d'une VM Linux sous VirtualBox pour tester sur la vraie plateforme cible.
 - Accès au dépôt depuis la VM : clone via un token d'accès en lecture seule, puis `git checkout lockscreen`.
 - Test du script existant sur la VM : il s'affiche et se lance correctement. 
-- Aucune modification du code pour l'instant.
+- Modification 1 : suppression des `bind` clavier/souris, ajout de `--timeout N` (garde-fou de test).
+- Modification 2 : remplacement de `--alpha` par une capture du bureau (Pillow), floutée et assombrie, affichée dans un `Canvas` avec l'horloge par-dessus. Repli en fond uni si la capture échoue. Test Windows OK.
+- **Pas encore testé sur la VM** : fond flouté, à valider (session X11 ou Wayland ?).
 
-**Prochaines étapes**
-1. Retirer la fermeture au clavier/souris et ajouter `--timeout`.
-2. Remplacer `-alpha` par un fond capturé et flouté.
-3. Date en français.
-4. Verrouillage réel avec xsecurelock (test en VM, session X11).
+
+**Reste à faire**
+1. Tester le fond flouté sur la VM (`echo $XDG_SESSION_TYPE`, puis `python3 lockscreen/screensaver_overlay.py --timeout 10`).
+2. Date en français (noms de jours et de mois écrits en dur dans le script).
+3. Vrai verrouillage avec mot de passe via xsecurelock (X11 obligatoire).
+4. Scripts `lock.sh`, `saver.sh`, `install.sh`.
+5. README du dossier `lockscreen/`, tests, pipeline GitLab.
 
 **IA utilisée** : Claude (Anthropic, Sonnet 5.5), 2026-09-30, pour l'analyse du script, le plan technique et les commandes Git. Conversation conservée.
 
