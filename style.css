@@ -26,3 +26,23 @@ main {
     width: 250px;
 
 }
+
+table {
+    width: 100%;
+    border: 1px solid black;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 5px;
+    text-align: center;
+}
+
+th {
+    background-color: lightblue;
+
+}
+
+#bloc-historique {
+    width: 400px;
+}
