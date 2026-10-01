@@ -1,4 +1,5 @@
-let matricule = '65243';
+let matricule = '';
+let statutActuel = false;
 
 // Liste d’exemple : remplace ces valeurs par la vrai liste une fois communiqué par les suppérieurs.
 const matriculesAutorises = [ '65033','65717', '65243','66100'];
@@ -46,21 +47,37 @@ function initMatricule(){
 function initHoraires() {
 
     document.getElementById("btn-debut").addEventListener("click", () => {
+        if (!matricule || !statutActuel) {
+            alert("This student doesn't have access");
+            return;
+        }
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Debut", heure);
     });
 
     document.getElementById("btn-fin").addEventListener("click", () => {
+        if (!matricule || !statutActuel) {
+            alert("This student doesn't have access");
+            return;
+        }
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Fin", heure);
     });
 
     document.getElementById("btn-toilette").addEventListener("click", () => {
+        if (!matricule || !statutActuel) {
+            alert("This student doesn't have access");
+            return;
+        }
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Toilette", heure);
     });
 
     document.getElementById("btn-triche").addEventListener("click", () => {
+        if (!matricule || !statutActuel) {
+            alert("This student doesn't have access");
+            return;
+        }
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Triche", heure);
     });
@@ -106,6 +123,7 @@ function afficherHistorique(){
 
 // Recevoir le résultat de la vérification et afficher le statut.
 function afficherStatut(autorise) {
+    statutActuel = autorise;
     const statut = document.getElementById('statut-etudiant');
 
     if (autorise === true) {
