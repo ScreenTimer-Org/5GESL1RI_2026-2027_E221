@@ -31,14 +31,12 @@ function initMatricule(){
         console.log('Matricule enregistré :', matricule);
         console.log('Autorisé :', autorise);
 
-        // Enregistrer la vérification dans l’historique.
-        const heure = new Date().toLocaleTimeString('fr-BE');
+        if (autorise) {
+            // Enregistrer la vérification dans l’historique.
+            const heure = new Date().toLocaleTimeString('fr-BE');
+            logEvent(matricule, 'Vérification : autorisé', heure);
 
-        logEvent(
-            matricule,
-            autorise ? 'Vérification : autorisé' : 'Vérification : non autorisé', 
-            heure
-        );
+        }
     });
 }
 
