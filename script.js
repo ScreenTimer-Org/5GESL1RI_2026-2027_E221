@@ -11,12 +11,32 @@ function initMatricule(){
 
 
 // Bloc Horaires (Cyril)
-function initHoraires(){
-    // à completer 
-    // - gérer les actions début/fin/toilette/triche
-    // - afficher les heures dans bloc-horaires
-    // - appeler logEvent(...) à chaque action 
+function initHoraires() {
+    const blocHoraires = document.getElementById("bloc-horaires");
 
+    document.getElementById("btn-debut").addEventListener("click", () => {
+        const heure = new Date().toLocaleTimeString();
+        blocHoraires.innerHTML += `<p>Début : ${heure}</p>`;
+        logEvent("début", heure);
+    });
+
+    document.getElementById("btn-fin").addEventListener("click", () => {
+        const heure = new Date().toLocaleTimeString();
+        blocHoraires.innerHTML += `<p>Fin : ${heure}</p>`;
+        logEvent("fin", heure);
+    });
+
+    document.getElementById("btn-toilette").addEventListener("click", () => {
+        const heure = new Date().toLocaleTimeString();
+        blocHoraires.innerHTML += `<p>Toilette : ${heure}</p>`;
+        logEvent("toilette", heure);
+    });
+
+    document.getElementById("btn-triche").addEventListener("click", () => {
+        const heure = new Date().toLocaleTimeString();
+        blocHoraires.innerHTML += `<p>Triche : ${heure}</p>`;
+        logEvent("triche", heure);
+    });
 }
 
 
