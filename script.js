@@ -12,30 +12,25 @@ function initMatricule(){
 
 // Bloc Horaires (Cyril)
 function initHoraires() {
-    const blocHoraires = document.getElementById("bloc-horaires");
 
     document.getElementById("btn-debut").addEventListener("click", () => {
         const heure = new Date().toLocaleTimeString();
-        blocHoraires.innerHTML += `<p>Début : ${heure}</p>`;
-        logEvent("début", heure);
+        logEvent(matricule,"Debut", heure);
     });
 
     document.getElementById("btn-fin").addEventListener("click", () => {
         const heure = new Date().toLocaleTimeString();
-        blocHoraires.innerHTML += `<p>Fin : ${heure}</p>`;
-        logEvent("fin", heure);
+        logEvent(matricule,"Fin", heure);
     });
 
     document.getElementById("btn-toilette").addEventListener("click", () => {
         const heure = new Date().toLocaleTimeString();
-        blocHoraires.innerHTML += `<p>Toilette : ${heure}</p>`;
-        logEvent("toilette", heure);
+        logEvent(matricule,"Toilette", heure);
     });
 
     document.getElementById("btn-triche").addEventListener("click", () => {
         const heure = new Date().toLocaleTimeString();
-        blocHoraires.innerHTML += `<p>Triche : ${heure}</p>`;
-        logEvent("triche", heure);
+        logEvent(matricule,"Triche", heure);
     });
 }
 
