@@ -9,7 +9,24 @@ ni ne le stocke.
 ## Avancement
 
 ### Ranya
-- À faire : ...
+- 2026-10-01 : création et test de "install.sh" sur Ubuntu
+dans une VM VMware, avec le bureau GNOME et une session X11.
+- installation des dépendances réussie.
+- Fond flouté et horloge affichés.
+- La souris et les touche simple ne déverouillent pas l'écran
+- Mauvais mdp refusé et bon mdp accepté
+- vérification aprés déverrouillage :aucun dossier temporaire.
+- Point 11 et 14 réalisés.
+**Reste à faire**
+
+1. Ajouter la locale `fr_FR.UTF-8` dans `install.sh`.
+2. Pipeline GitLab (point 13).
+3. Documentation d'utilisation (point 15).
+4. Retirer `--timeout` et faire la merge request vers `main` (point 17).
+
+**IA utilisée** :
+- ChatGPT (OpenAI), 2026-10-01, pour la création de `install.sh`. Conversation conservée.
+- Claude (Anthropic, Sonnet 5.5), 2026-10-02, pour la relecture de `install.sh` et du README. Conversation conservée.
 
 ### Aurélien
 - 2026-09-30 : création de la branche, ajout du prototype `screensaver_overlay.py`
