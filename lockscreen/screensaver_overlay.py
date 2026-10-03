@@ -161,8 +161,8 @@ class ScreenOverlay:
         if self.fond is not None:
             self.photo = ImageTk.PhotoImage(self.fond.resize((w, h)))
             self.canvas.itemconfig(self.image_id, image=self.photo)
-        self.canvas.coords(self.clock, w // 2, h // 2)
-        self.canvas.coords(self.date, w // 2, h // 2 + 100)
+        self.canvas.coords(self.clock, w // 2, h // 4)
+        self.canvas.coords(self.date, w // 2, h // 4 + 100)
 
     def update_clock(self):
         now = datetime.now()
