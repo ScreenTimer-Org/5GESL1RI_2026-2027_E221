@@ -28,7 +28,8 @@ from PIL import Image, ImageEnhance, ImageFilter, ImageGrab, ImageTk
 
 
 def regler_locale():
-    """Date dans la langue du systeme ; repli silencieux si locale absente."""
+    # Adapte la langue de la date à celle du système (ex: français si le système est en français).
+    # Si la locale demandée n'existe pas, on continue sans erreur.
     try:
         locale.setlocale(locale.LC_TIME, "")
     except locale.Error:
@@ -36,13 +37,15 @@ def regler_locale():
 
 
 def capturer_ecran():
-    """Capture du bureau : Pillow d'abord, scrot en repli."""
+    # Prend une photo du bureau avec Pillow.
+    # Si Pillow échoue (ex: Wayland), on essaie scrot à la place.
     try:
         return ImageGrab.grab().convert("RGB")
     except Exception:
         pass
-    # Repli scrot : fichier dans un dossier prive (mkdtemp = droits 700),
-    # supprime dans tous les cas.
+
+    # Repli scrot : on crée un dossier temporaire privé (droits 700)
+    # pour y mettre la capture, puis on le supprime dans tous les cas.
     dossier = tempfile.mkdtemp(prefix="lockscreen.")
     chemin = os.path.join(dossier, "capture.png")
     try:
@@ -51,6 +54,7 @@ def capturer_ecran():
         with Image.open(chemin) as img:
             return img.convert("RGB")
     finally:
+        # Nettoyage garanti, même si une erreur s'est produite.
         try:
             os.remove(chemin)
         except OSError:
@@ -62,22 +66,28 @@ def capturer_ecran():
 
 
 def preparer_fond(chemin=None, flou=6.0, luminosite=0.5):
-    """Image de fond floutee et assombrie, ou None si impossible."""
+    # Charge une image (fournie par lock.sh via --fond, ou capturée à l'instant),
+    # la floute et l'assombrit. Renvoie None si impossible : l'écran affichera
+    # alors un fond uni à la place.
     try:
         if chemin:
+            # lock.sh a déjà pris la capture et nous passe son chemin.
             with Image.open(chemin) as img:
                 img = img.convert("RGB")
         else:
+            # Mode autonome : on capture le bureau nous-mêmes.
             img = capturer_ecran()
         img = img.filter(ImageFilter.GaussianBlur(flou))
         return ImageEnhance.Brightness(img).enhance(luminosite)
     except Exception:
-        return None          # repli : fond uni
+        return None
 
 
 def taille_fenetre_hote(fenetre_hote):
-    """Taille (largeur, hauteur) de la fenetre fournie par xsecurelock,
-    lue avec xwininfo (paquet x11-utils). None si impossible."""
+    # En mode embarqué, xsecurelock nous fournit l'identifiant de sa fenêtre.
+    # Tkinter ne détecte pas automatiquement sa taille, donc on la lit
+    # avec xwininfo. Sans ça, le canvas reste à 378x264 (taille par défaut de Tk)
+    # et l'image s'affiche toute petite en haut à gauche.
     try:
         sortie = subprocess.run(
             ["xwininfo", "-id", fenetre_hote], capture_output=True,
@@ -93,17 +103,20 @@ def taille_fenetre_hote(fenetre_hote):
             return largeur, hauteur
     except Exception:
         pass
-    return None
+    return None  # repli : on utilisera la taille de l'écran
 
 
 class ScreenOverlay:
     def __init__(self, alpha=1.0, bg_color="black", fg_color="white",
                  fond=None, timeout=None):
+
+        # Si xsecurelock a lancé ce script, il définit XSCREENSAVER_WINDOW.
+        # On s'attache à cette fenêtre pour dessiner dedans.
+        # Sinon, on crée notre propre fenêtre plein écran (mode test).
         fenetre_hote = os.environ.get("XSCREENSAVER_WINDOW")
         self.embarque = bool(fenetre_hote)
 
         if self.embarque:
-            # Mode xsecurelock : on s'attache a la fenetre fournie.
             self.root = tk.Tk(use=fenetre_hote)
         else:
             self.root = tk.Tk()
@@ -116,33 +129,40 @@ class ScreenOverlay:
 
         self.root.configure(bg=bg_color)
         self.root.config(cursor="none")
+        # Empêche la fermeture de la fenêtre par le gestionnaire de bureau.
         self.root.protocol("WM_DELETE_WINDOW", lambda: None)
 
         self.fond = fond
-        self.taille = (0, 0)
-        self.photo = None
+        self.taille = (0, 0)  # mémorise la dernière taille dessinée
+        self.photo = None     # référence à garder pour éviter que Tk efface l'image
+
         options_canvas = {}
         if self.embarque:
-            # Tk ne suit pas la taille de la fenetre hote : on la lit et on
-            # l'impose (repli : taille de l'ecran).
+            # On impose la taille de la fenêtre xsecurelock au canvas,
+            # car Tk ne la détecte pas seul en mode embarqué.
             w, h = (taille_fenetre_hote(fenetre_hote)
                     or (self.root.winfo_screenwidth(),
                         self.root.winfo_screenheight()))
             options_canvas = {"width": w, "height": h}
+
         self.canvas = tk.Canvas(self.root, bg=bg_color, highlightthickness=0,
                                 **options_canvas)
         self.canvas.pack(fill="both", expand=True)
 
+        # On crée les éléments visuels à la position (0,0) pour l'instant.
+        # redessiner() les placera correctement une fois la taille connue.
         self.image_id = self.canvas.create_image(0, 0, anchor="nw")
         self.clock = self.canvas.create_text(
             0, 0, fill=fg_color, font=("DejaVu Sans", 90, "bold"))
         self.date = self.canvas.create_text(
             0, 0, fill=fg_color, font=("DejaVu Sans", 28))
 
-        # La taille reelle de la fenetre n'est connue qu'apres l'evenement
-        # <Configure> (surtout en mode embarque) : on redessine a ce moment.
+        # <Configure> se déclenche quand la fenêtre est prête et à chaque
+        # redimensionnement : c'est là qu'on connaît la vraie taille.
         self.canvas.bind("<Configure>", self.redessiner)
 
+        # Fermeture automatique après N secondes (utile pour les tests).
+        # En usage réel, c'est xsecurelock qui ferme le saver au déverrouillage.
         if timeout:
             self.root.after(timeout * 1000, self.close)
 
@@ -152,19 +172,28 @@ class ScreenOverlay:
         self.root.mainloop()
 
     def redessiner(self, event=None):
+        # Appelée à chaque changement de taille de la fenêtre.
+        # On ne redessine que si la taille a vraiment changé.
         w, h = self.canvas.winfo_width(), self.canvas.winfo_height()
         if (w, h) == self.taille or w <= 1 or h <= 1:
             return
         self.taille = (w, h)
+
         if os.environ.get("LOCKSCREEN_DEBUG"):
             print(f"lockscreen: taille fenetre {w}x{h}", flush=True)
+
+        # Redimensionne le fond à la taille exacte de la fenêtre.
         if self.fond is not None:
             self.photo = ImageTk.PhotoImage(self.fond.resize((w, h)))
             self.canvas.itemconfig(self.image_id, image=self.photo)
+
+        # Horloge dans le quart supérieur pour ne pas être cachée
+        # par la boîte de saisie du mot de passe de xsecurelock (centrée).
         self.canvas.coords(self.clock, w // 2, h // 4)
         self.canvas.coords(self.date, w // 2, h // 4 + 100)
 
     def update_clock(self):
+        # Met à jour l'heure et la date toutes les secondes.
         now = datetime.now()
         self.canvas.itemconfig(self.clock, text=now.strftime("%H:%M:%S"))
         self.canvas.itemconfig(self.date, text=now.strftime("%A %d %B %Y").capitalize())
@@ -194,7 +223,8 @@ def parse_args(argv=None):
 if __name__ == "__main__":
     args = parse_args()
     regler_locale()
-    # La capture se fait AVANT la creation de la fenetre.
+    # La capture se fait AVANT la création de la fenêtre Tkinter.
+    # Si on attendait après, on photographierait notre propre écran noir.
     fond = preparer_fond(args.fond, args.blur, args.dim)
     ScreenOverlay(alpha=args.alpha, bg_color=args.bg, fg_color=args.fg,
                   fond=fond, timeout=args.timeout)
