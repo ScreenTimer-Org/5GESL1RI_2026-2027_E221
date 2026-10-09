@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Examen - Gestion de présence</title>
     <link rel="stylesheet" href="style.css">
-
+    
 </head>
 
 <body>
@@ -22,6 +22,9 @@
             <h2>Matricule</h2>
 
             <form id="form-matricule">
+                <label for="cours">Cours de l’examen :</label>
+                <input type="text" id="cours" name="cours" placeholder="Exemple : 5ASR1R" value="" required>
+                <p> </p>
                 <label for="matricule">Matricule de l’étudiant :</label>
 
                 <input type="text" id="matricule" name="matricule" placeholder="Exemple : 65717 " inputmode="numeric">

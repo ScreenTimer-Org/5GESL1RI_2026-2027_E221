@@ -1,42 +1,46 @@
+// Attention pour lancer le projet il faut télécharger l'extention VS Code Live Server pour simuler un déploiement sinon le chargement du csv ne s'effectue pas.   
+
 let matricule = '';
 let statutActuel = false;
+let pae = {};
 
-// Liste d’exemple : remplace ces valeurs par la vrai liste une fois communiqué par les suppérieurs.
-const matriculesAutorises = [ '65033','65717', '65243','66100'];
+//Chargement du csv 
+fetch('pae_etudiants.csv')
+    .then(reponse => reponse.text())
+    .then(texte => {
+        texte.split('\n').slice(1).forEach(ligne => {
+            const [id, cours] = ligne.trim().split(',');
 
+            if (id && cours) {
+                pae[id] = cours.split('|');
+            }
+        });
+    });
 
 // Bloc Matricule + Statut (Maxime)
 function initMatricule(){
-    // à completer 
-    //- écouter la saisie/validation du matricule
-    //- vérifier si le matricule est autorisé
-    // - afficher vert/rouge dans bloc-statut
-    // - appeler logEvent(...) à chaque validation 
 
     const formulaire = document.getElementById('form-matricule');
     const champMatricule = document.getElementById('matricule');
+    const champCours = document.getElementById('cours');
 
     formulaire.addEventListener('submit', (event) => {
         // Empêcher le rechargement de la page.
         event.preventDefault();
 
-        // Stocker la saisie dans la variable.
+         // Stocker la saisie dans la variable.
         matricule = champMatricule.value.trim();
 
         // Afficher la valeur pour vérifier le fonctionnement.
-        const autorise = matriculesAutorises.includes(matricule);
+        const cours = champCours.value.trim().toUpperCase();
+
+        const autorise = !!pae[matricule] && pae[matricule].includes(cours);
         
         afficherStatut(autorise)
 
         console.log('Matricule enregistré :', matricule);
         console.log('Autorisé :', autorise);
 
-        if (autorise) {
-            // Enregistrer la vérification dans l’historique.
-            const heure = new Date().toLocaleTimeString('fr-BE');
-            logEvent(matricule, 'Vérification : autorisé', heure);
-
-        }
     });
 }
 

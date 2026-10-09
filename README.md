@@ -69,3 +69,12 @@ Permettre au professeur de taper le matricule d'un étudiant, de voir immédiate
 - [ ] Remplacer la liste `matriculesAutorises` d'exemple par la vraie liste communiquée par les responsables
 - [ ] Tests finaux avec plusieurs matricules à la suite (autorisés et refusés)
 - [ ] Vérification de l'affichage sur petit écran / autre navigateur si le temps le permet
+
+
+## Vérification du PAE
+
+Le fichier `pae_etudiants.csv` contient un matricule et la liste de ses cours.
+Au chargement de la page, le fichier est lu en JavaScript.
+Le professeur encode le cours de l’examen et le matricule de l’étudiant.
+L’étudiant est autorisé uniquement si ce cours est présent dans son PAE.
+Le projet doit être lancé avec Live Server.
