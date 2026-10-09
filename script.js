@@ -4,6 +4,8 @@ let matricule = '';
 let statutActuel = false;
 let pae = {};
 
+let coursExamen = '';
+
 //Chargement du csv 
 fetch('pae_etudiants.csv')
     .then(reponse => reponse.text())
@@ -17,7 +19,7 @@ fetch('pae_etudiants.csv')
         });
     });
 
-// Bloc Matricule + Statut (Maxime)
+// Bloc Matricule + Statut 
 function initMatricule(){
 
     const formulaire = document.getElementById('form-matricule');
@@ -34,6 +36,8 @@ function initMatricule(){
         // Afficher la valeur pour vérifier le fonctionnement.
         const cours = champCours.value.trim().toUpperCase();
 
+        coursExamen = cours;
+
         const autorise = !!pae[matricule] && pae[matricule].includes(cours);
         
         afficherStatut(autorise)
@@ -45,7 +49,7 @@ function initMatricule(){
 }
 
 
-// Bloc Horaires (Cyril)
+// Bloc Horaires 
 function initHoraires() {
 
     document.getElementById("btn-debut").addEventListener("click", () => {
@@ -86,7 +90,38 @@ function initHoraires() {
 }
 
 
-// Bloc Historique (Sila)
+function sauvegarderHistorique(cours, historique){
+    // à completer par Van Vo
+}
+
+
+function chargerHistorique(cours){
+    // à completer par Van Vo
+    return {};
+}
+
+
+function exporterCSV(cours){
+    // à completer par Van Vo
+}
+
+
+function afficherEleve(matricule){
+    // à completer par Jaouad
+}
+
+
+function viderEleve(){
+    // à completer par Jaouad
+}
+
+
+function traiterScan(matricule, cours, autorise){
+    // à completer par Sila
+}
+
+
+// Bloc Historique 
 const historique = {};
 function logEvent(matricule, typeEvenement, heure){
     // If it's the first time, we see this student
@@ -140,4 +175,7 @@ function afficherStatut(autorise) {
 document.addEventListener('DOMContentLoaded', () => {
     initMatricule();
     initHoraires();
+
+    // bouton d'export
+    document.getElementById('btn-export').addEventListener('click', () => exporterCSV(coursExamen));
 });
