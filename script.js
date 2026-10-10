@@ -41,6 +41,7 @@ function initMatricule(){
         const autorise = !!pae[matricule] && pae[matricule].includes(cours);
         
         afficherStatut(autorise)
+        traiterScan(matricule, cours, autorise);
 
         console.log('Matricule enregistré :', matricule);
         console.log('Autorisé :', autorise);
@@ -117,7 +118,22 @@ function viderEleve(){
 
 
 function traiterScan(matricule, cours, autorise){
-    // à completer par Sila
+    if (!autorise) {
+        viderEleve();
+        return;
+    }
+
+    afficherEleve({matricule: matricule});
+    const heure = new Date().toLocaleTimeString();
+    const fiche = historique[matricule];
+
+    if (!fiche || fiche.debut === '') {
+        logEvent(matricule, 'Debut', heure);
+    } else if (fiche.fin === '') {
+        logEvent(matricule, 'Fin', heure);
+    } else {
+        alert('Cet étudiant est déjà sorti');
+    }
 }
 
 
