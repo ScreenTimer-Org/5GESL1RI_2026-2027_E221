@@ -85,6 +85,7 @@ function initMatricule(){
         const etudiant = trouverEtudiant(matricule, cours);
         const autorise = etudiant !== null;
         afficherStatut(autorise);
+        traiterScan(matricule, cours, autorise);
 
         console.log('Matricule enregistré :', matricule);
         console.log('Autorisé :', autorise);
@@ -207,21 +208,65 @@ function exporterCSV(cours){
     URL.revokeObjectURL(url);
 }
 
-// ============================================================
+
+// Ajouté par Jaouad
+function afficherPhotoParDefaut() {
+    this.onerror = null;
+    this.src = 'photos/default.jpg';
+}
 
 
-function afficherEleve(matricule){
-    // à completer par Jaouad
+function afficherEleve(etudiant) {
+    const photo = document.getElementById('photo-eleve');
+    const texteMatricule = document.getElementById('matricule-eleve');
+
+    if (!etudiant || !etudiant.matricule) {
+        viderEleve();
+        return;
+    }
+
+    const matriculeEleve = String(etudiant.matricule).trim();
+
+    texteMatricule.textContent = 'Matricule : '+ matriculeEleve;
+
+    photo.hidden = false;
+    photo.alt = 'Photo de l\'étudiant ' + matriculeEleve;
+
+    photo.onerror = afficherPhotoParDefaut;
+    photo.src = 'photos/' + matriculeEleve + '.jpg';
 }
 
 
 function viderEleve(){
-    // à completer par Jaouad
+    const photo = document.getElementById('photo-eleve');
+    const texteMatricule = document.getElementById('matricule-eleve');
+
+    photo.hidden = true;
+    photo.onerror = null;
+    photo.src = 'photos/default.jpg';
+    photo.alt = 'Photo de l\'étudiant par défaut';
+
+    texteMatricule.textContent = '';
 }
 
 
 function traiterScan(matricule, cours, autorise){
-    // à completer par Sila
+    if (!autorise) {
+        viderEleve();
+        return;
+    }
+
+    afficherEleve({matricule: matricule});
+    const heure = new Date().toLocaleTimeString();
+    const fiche = historique[matricule];
+
+    if (!fiche || fiche.debut === '') {
+        logEvent(matricule, 'Debut', heure);
+    } else if (fiche.fin === '') {
+        logEvent(matricule, 'Fin', heure);
+    } else {
+        alert('Cet étudiant est déjà sorti');
+    }
 }
 
 

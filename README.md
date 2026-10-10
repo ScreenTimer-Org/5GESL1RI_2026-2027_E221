@@ -78,3 +78,19 @@ Au chargement de la page, le fichier est lu en JavaScript.
 Le professeur encode le cours de l’examen et le matricule de l’étudiant.
 L’étudiant est autorisé uniquement si ce cours est présent dans son PAE.
 Le projet doit être lancé avec Live Server.
+
+## Travail de Sila
+
+* Ajout de `traiterScan(matricule, cours, autorise)`, appelée après la vérification du PAE.
+* Étudiant refusé : le bloc étudiant est vidé et rien n'est enregistré dans l'historique.
+* 1er scan d'un étudiant autorisé : photo affichée et heure de début enregistrée.
+* 2e scan : heure de fin enregistrée. 3e scan : message « déjà sorti ».
+* Préparation du squelette commun (bloc étudiant, bouton d'export, fonctions vides).
+
+### Travail de Jaouad
+
+- Ajout de l’affichage de la photo et du matricule de l’étudiant.
+- Les photos sont chargées depuis `photos/<matricule>.jpg`.
+- Une photo par défaut est affichée lorsque la photo est introuvable.
+- `viderEleve()` efface le bloc lorsqu’un étudiant est refusé.
+- Test : appeler `afficherEleve({ matricule: "65717", cours: [] })` dans la console.
