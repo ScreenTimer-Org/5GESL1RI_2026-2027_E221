@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Examen - Gestion de présence</title>
     <link rel="stylesheet" href="style.css">
-    
+
 </head>
 
 <body>
@@ -23,13 +23,15 @@
 
             <form id="form-matricule">
                 <label for="cours">Cours de l’examen :</label>
-                <input type="text" id="cours" name="cours" placeholder="Exemple : 5ASR1R" value="" required>
-                <p> </p>
+                <select id="cours" name="cours" required>
+                    <option value="">-- Choisir le cours de l'examen --</option>
+                </select>
+
+                <p></p>
+                
                 <label for="matricule">Matricule de l’étudiant :</label>
-
-                <input type="text" id="matricule" name="matricule" placeholder="Exemple : 65717 " inputmode="numeric">
+                <input type="text" id="matricule" name="matricule" placeholder="Exemple : 65717" inputmode="numeric" required>
                 <button type="submit">Valider</button>
-
             </form>
         </section>
 
@@ -54,7 +56,7 @@
 
         <section id="bloc-historique" class="bloc">
             <h2>Historique</h2>
-            <table id ="tableau-historique">
+            <table id="tableau-historique">
                 <tr>
                     <th>Matricule</th>
                     <th>Heure Debut</th>

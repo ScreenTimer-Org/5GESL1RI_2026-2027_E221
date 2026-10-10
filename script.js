@@ -2,22 +2,69 @@
 
 let matricule = '';
 let statutActuel = false;
-let pae = {};
-
 let coursExamen = '';
+let listeEtudiants = [];
 
-// Chargement du csv
-fetch('pae_etudiants.csv')
-    .then(reponse => reponse.text())
-    .then(texte => {
-        texte.split('\n').slice(1).forEach(ligne => {
-            const [id, cours] = ligne.trim().split(',');
+// Chargement du CSV
+async function chargerListe() {
+    try {
+        const reponse = await fetch('pae_etudiants.csv');
 
-            if (id && cours) {
-                pae[id] = cours.split('|');
-            }
-        });
+        if (!reponse.ok) {
+            throw new Error('Impossible de charger le fichier CSV');
+        }
+
+        const texte = await reponse.text();
+
+        listeEtudiants = texte
+            .split(/\r?\n/)
+            .slice(1) // Ignore la première ligne : matricule,courses
+            .filter(ligne => ligne.trim() !== '')
+            .map(ligne => {
+                const [id, listeCours] = ligne.trim().split(',');
+
+                return {
+                    matricule: id.trim(),
+                    cours: listeCours
+                        .split('|')
+                        .map(cours => cours.trim())
+                        .filter(Boolean)
+                };
+            });
+        remplirMenuCours();
+        console.log('PAE chargés :', listeEtudiants);
+
+    } catch (erreur) {
+        console.error('Erreur CSV :', erreur);
+        alert('Le fichier pae_etudiants.csv n’a pas pu être chargé.');
+    }
+}
+
+function trouverEtudiant(matricule, cours) {
+    return listeEtudiants.find(etudiant =>
+        etudiant.matricule === matricule &&
+        etudiant.cours.includes(cours)
+    ) || null;
+}
+
+function remplirMenuCours() {
+    const menu = document.getElementById('cours');
+
+    // Récupère chaque cours une seule fois.
+    const coursUniques = [...new Set(
+        listeEtudiants.flatMap(etudiant => etudiant.cours)
+    )].sort();
+
+    // Garde uniquement l'option de départ.
+    menu.innerHTML = '<option value="">-- Choisir le cours de l\'examen --</option>';
+
+    coursUniques.forEach(cours => {
+        const option = document.createElement('option');
+        option.value = cours;
+        option.textContent = cours;
+        menu.appendChild(option);
     });
+}
 
 // Bloc Matricule + Statut
 function initMatricule(){
@@ -35,8 +82,8 @@ function initMatricule(){
         coursExamen = cours;
         localStorage.setItem('dernierCours', coursExamen);
 
-        const autorise = !!pae[matricule] && pae[matricule].includes(cours);
-
+        const etudiant = trouverEtudiant(matricule, cours);
+        const autorise = etudiant !== null;
         afficherStatut(autorise);
 
         console.log('Matricule enregistré :', matricule);
@@ -218,7 +265,8 @@ function afficherStatut(autorise) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await chargerListe();
     initMatricule();
     initHoraires();
 
