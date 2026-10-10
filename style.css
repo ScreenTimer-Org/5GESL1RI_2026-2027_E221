@@ -46,3 +46,32 @@ th {
 #bloc-historique {
     width: 400px;
 }
+
+#bloc-eleve {
+    text-align: center;
+}
+
+#photo-eleve {
+    display: block;
+    width: 120px;
+    height: 150px;
+    margin: 0 auto 12px;
+    border: 2px solid lightblue;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+#photo-eleve[hidden] {
+    display: none;
+}
+
+#matricule-eleve {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#statut-etudiant {
+    font-size: 18px;
+    font-weight: bold;
+}

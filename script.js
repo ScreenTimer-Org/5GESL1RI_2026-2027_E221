@@ -106,14 +106,44 @@ function exporterCSV(cours){
     // à completer par Van Vo
 }
 
+// Ajouté par Jaouad
+function afficherPhotoParDefaut() {
+    this.onerror = null;
+    this.src = 'photos/default.jpg';
+}
 
-function afficherEleve(matricule){
-    // à completer par Jaouad
+
+function afficherEleve(etudiant) {
+    const photo = document.getElementById('photo-eleve');
+    const texteMatricule = document.getElementById('matricule-eleve');
+
+    if (!etudiant || !etudiant.matricule) {
+        viderEleve();
+        return;
+    }
+
+    const matriculeEleve = String(etudiant.matricule).trim();
+
+    texteMatricule.textContent = 'Matricule : '+ matriculeEleve;
+
+    photo.hidden = false;
+    photo.alt = 'Photo de l\'étudiant ' + matriculeEleve;
+
+    photo.onerror = afficherPhotoParDefaut;
+    photo.src = 'photos/' + matriculeEleve + '.jpg';
 }
 
 
 function viderEleve(){
-    // à completer par Jaouad
+    const photo = document.getElementById('photo-eleve');
+    const texteMatricule = document.getElementById('matricule-eleve');
+
+    photo.hidden = true;
+    photo.onerror = null;
+    photo.src = 'photos/default.jpg';
+    photo.alt = 'Photo de l\'étudiant par défaut';
+
+    texteMatricule.textContent = '';
 }
 
 

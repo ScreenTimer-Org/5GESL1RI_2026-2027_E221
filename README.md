@@ -86,3 +86,11 @@ Le projet doit être lancé avec Live Server.
 * 1er scan d'un étudiant autorisé : photo affichée et heure de début enregistrée.
 * 2e scan : heure de fin enregistrée. 3e scan : message « déjà sorti ».
 * Préparation du squelette commun (bloc étudiant, bouton d'export, fonctions vides).
+
+### Travail de Jaouad
+
+- Ajout de l’affichage de la photo et du matricule de l’étudiant.
+- Les photos sont chargées depuis `photos/<matricule>.jpg`.
+- Une photo par défaut est affichée lorsque la photo est introuvable.
+- `viderEleve()` efface le bloc lorsqu’un étudiant est refusé.
+- Test : appeler `afficherEleve({ matricule: "65717", cours: [] })` dans la console.
