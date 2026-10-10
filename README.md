@@ -1,96 +1,141 @@
-# Rapport technique — Branche `qr-code`
+# Rapport technique 
  
 **Projet :** QR Code Examen — Gestion de présence
-**Fichiers couverts :** `index.html`, `style.css`, `script.js`
-
  
-## 1. Objectif du module
+ 
+## Objectif du module
  
 Permettre au professeur de taper le matricule d'un étudiant, de voir immédiatement s'il est autorisé (vert) ou non (rouge), et de suivre les événements de la séance (début, fin, passage aux toilettes, suspicion de triche) dans un historique consultable.
  
 
-## 2. `index.html` — Structure
+## Lancer le projet
+
+Le fichier pae_etudiants.csv est lu par JavaScript, ce qui ne marche pas si on
+ouvre index.html par double-clic.
+
+1. Ouvrir le dossier du projet dans VS Code.
+2. Installer l'extension Live Server.
+3. Cliquer sur « Go Live » en bas à droite.
  
-- Un `<header>` avec le titre de la page.
-- Un `<main>` contenant 4 blocs (`<section class="bloc">`) :
-  - `#bloc-matricule` : formulaire `#form-matricule` avec un champ `#matricule` et un bouton "Valider".
-  - `#bloc-statut` : un paragraphe `#statut-etudiant` qui affiche "Autorisé" ou "Non autorisé".
-  - `#bloc-horaires` : 4 boutons (`#btn-debut`, `#btn-fin`, `#btn-toilette`, `#btn-triche`).
-  - `#bloc-historique` : un tableau `#tableau-historique` avec les colonnes Matricule, Heure Debut, Heure Fin, Toilette, Triche.
-- Un `<footer>` avec le nom du projet.
-- Le fichier charge `style.css` dans le `<head>` et `script.js` juste avant la fermeture de `</body>`.
+
+## Fichiers du projet 
+
+- index.html : la structure de la page.
+- style.css : la mise en forme.
+- script.js : tout le fonctionnement.
+- pae_etudiants.csv : le PAE du groupe. Une ligne par étudiant : son matricule,
+  une virgule, puis ses cours séparés par le caractère |.
+- photos/ : une photo par étudiant, nommée avec le matricule (exemple : 65717.jpg)
+ 
+
+## Fonctionnement en bref
+
+1. Au chargement, la page lit le PAE et remplit le menu avec les cours trouvés.
+2. Le professeur choisit le cours, tape le matricule et clique sur Valider.
+3. Si le matricule est inscrit à ce cours : statut vert et photo affichée.
+   1re validation : heure de début. 2e validation : heure de fin.
+   3e validation : message « Cet étudiant est déjà sorti ».
+4. Sinon : statut rouge, photo effacée, rien n'est enregistré.
+5. Les boutons Toilette et Triche notent l'événement pour l'étudiant en cours,
+   tant qu'il n'est pas sorti.
+6. L'historique est affiché dans un tableau, sauvegardé dans le navigateur
+   (un historique par cours) et exportable en CSV.
 
 
-## 3. `style.css` — Mise en forme
- 
-- Mise en page générale en `flex` (les 4 blocs s'alignent côte à côte et passent à la ligne sur petit écran).
-- Chaque bloc (`.bloc`) a un fond blanc, des coins arrondis et un padding.
-- `#bloc-historique` est élargi à 400px pour laisser de la place au tableau.
-- Le tableau (`table`, `th`, `td`) a des bordures nettes, un padding, un texte centré, et un fond gris-bleu clair sur les en-têtes.
+## index.html
 
-## 4. `script.js` — État fonctionnel actuel
- 
-| Fonctionnalité | Statut |
-|-----------------|--------|
-| Saisie et validation du matricule | Fonctionnel |
-| Affichage vert (autorisé) / rouge (non autorisé) | Fonctionnel |
-| Boutons horaires (début, fin, toilette, triche) | Fonctionnel |
-| Historique mis à jour dynamiquement | Fonctionnel |
-| Style du tableau historique | Fonctionnel |
- 
+Cinq blocs : Matricule (menu du cours, champ matricule, bouton Valider), Statut,
+Étudiant (photo et matricule), Horaires (boutons Toilette et Triche) et
+Historique (tableau et bouton Exporter en CSV).
+
+
+## style.css
+
+Les blocs s'alignent avec flex et passent à la ligne sur petit écran. Le tableau
+a des bordures et des titres en bleu clair. Le bloc étudiant centre la photo
+(120 x 150 pixels) et la cache tant qu'aucun étudiant n'est affiché.
+
+
+## script.js
 
 ### Variables globales
 
-- `matricule` : matricule actuellement validé (vide par défaut).
-- `statutActuel` : booléen, vrai si le dernier matricule validé est autorisé.
-- `matriculesAutorises` : liste des matricules valides (exemple, à remplacer par la vraie liste).
-- `historique` : objet qui stocke, par matricule, les heures de début/fin et les statuts toilette/triche.
+- matricule : le dernier matricule validé.
+- statutActuel : vrai si ce matricule est autorisé.
+- coursExamen : le cours choisi par le professeur.
+- listeEtudiants : la liste lue dans le CSV (un matricule et la liste de ses cours).
+- historique : les fiches des étudiants du cours en cours (début, fin, toilette, triche).
+
+### Lecture du PAE (Responsable : Maxime)
+
+- chargerListe() : lit pae_etudiants.csv avec fetch, ignore la première ligne et
+  les lignes vides, puis remplit listeEtudiants. Affiche un message si le fichier
+  ne peut pas être chargé.
+- trouverEtudiant(matricule, cours) : renvoie l'étudiant si ce matricule existe et
+  que son PAE contient ce cours, sinon null.
+- remplirMenuCours() : remplit le menu avec chaque cours du fichier, une seule fois,
+  dans l'ordre alphabétique.
+
+### Formulaire et statut (Responsable : Maxime)
+
+- initMatricule() : à la validation du formulaire, récupère le cours et le matricule,
+  vérifie avec trouverEtudiant(), puis appelle afficherStatut() et traiterScan().
+  Quand on change de cours dans le menu, elle charge l'historique de ce cours et
+  remet l'étudiant à zéro.
+- afficherStatut(autorise) : affiche « Autorisé » en vert ou « Non autorisé » en rouge.
+
+### Scan, début et fin (Responsable : Sila)
+
+- traiterScan(matricule, cours, autorise) : si l'étudiant est refusé, elle vide le
+  bloc étudiant. S'il est autorisé, elle affiche sa photo puis enregistre le début
+  (1re fois) ou la fin (2e fois). À la 3e fois, elle affiche « déjà sorti ».
+
+### Toilette et triche (Responsable : Sila)
+
+- initHoraires() : relie les boutons Toilette et Triche. Chaque clic enregistre
+  l'heure pour l'étudiant en cours.
+- peutModifier() : refuse l'action si aucun étudiant autorisé n'est validé, ou si
+  l'étudiant est déjà sorti (sa fiche est fermée).
+
+### Historique (Responsable : Sila)
+
+- logEvent(matricule, typeEvenement, heure) : crée la fiche de l'étudiant
+  si besoin, y note l'événement (Debut, Fin, Toilette ou Triche), sauvegarde et
+  redessine le tableau.
+- afficherHistorique() : reconstruit le tableau à partir de l'objet historique.
+
+### Sauvegarde et export (Responsable : Van Vo)
+
+- cleHistorique(cours) : donne le nom sous lequel l'historique d'un cours est rangé
+  dans le navigateur.
+- sauvegarderHistorique(cours, historique) : enregistre l'historique dans le localStorage.
+- chargerHistorique(cours) : relit l'historique d'un cours, ou renvoie un historique
+  vide s'il n'existe pas.
+- exporterCSV(cours) : télécharge le fichier historique-COURS.csv.
+- Au chargement de la page, le dernier cours utilisé est remis dans le menu et son
+  historique est réaffiché.
+
+### Bloc étudiant (Responsable : Jaouad)
+
+- afficherEleve(etudiant) : affiche la photo (photos/matricule.jpg) et le matricule.
+- viderEleve() : cache la photo et efface le matricule.
+- afficherPhotoParDefaut() : affiche une photo de secours si la photo est introuvable.
 
 
-### Fonctions
+## Tests effectués
 
-- `initMatricule()` : écoute la soumission du formulaire, vérifie le matricule, appelle `afficherStatut()` et ajoute une ligne à l'historique si autorisé.
-- `initHoraires()` : écoute les 4 boutons horaires ; chaque clic est bloqué si aucun matricule n'est validé ou si le dernier matricule est refusé.
-- `logEvent(matricule, typeEvenement, heure)` : met à jour l'objet `historique` et redessine le tableau.
-- `afficherHistorique()` : reconstruit le tableau HTML à partir de l'objet `historique`.
-- `afficherStatut(autorise)` : met à jour `statutActuel` et affiche "Autorisé"/"Non autorisé" en vert/rouge.
-
-
-### Bugs identifiés et corrigés en cours d'intégration
+1. Cours 5ASR1R et matricule 65717 : vert, photo, heure de début.
+2. Même validation une 2e fois : heure de fin. Une 3e fois : « déjà sorti ».
+3. Cours 3ALG3A avec le même matricule : rouge, photo effacée, rien enregistré.
+4. Toilette et Triche : « Oui » dans le tableau, puis bloqués après la sortie.
+5. Export CSV : le fichier se télécharge avec les lignes de l'historique.
+6. Rechargement de la page : le cours et l'historique reviennent.
  
-1. **Matricule de test codé en dur** — `let matricule = '65243';` provoquait l'enregistrement d'événements sous un matricule factice si un bouton horaire était cliqué avant toute validation. → Corrigé : valeur initialisée à vide (`''`).
-2. **Boutons horaires actifs sans matricule validé** — ajout d'une vérification bloquante (`if (!matricule) { ... }`) avant chaque action.
-3. **Boutons horaires actifs même pour un matricule refusé** — ajout de `statutActuel`, qui bloque les 4 boutons tant que l'étudiant n'est pas autorisé.
-4. **Un matricule refusé apparaissait quand même dans l'historique** — `logEvent()` n'est désormais appelé qu'en cas de matricule autorisé lors de la soumission du formulaire.
 
+## Limites et suite
 
-## 5. Reste à faire
- 
-- [ ] Remplacer la liste `matriculesAutorises` d'exemple par la vraie liste communiquée par les responsables
-- [ ] Tests finaux avec plusieurs matricules à la suite (autorisés et refusés)
-- [ ] Vérification de l'affichage sur petit écran / autre navigateur si le temps le permet
-
-
-## Vérification du PAE
-
-Le fichier `pae_etudiants.csv` contient un matricule et la liste de ses cours.
-Au chargement de la page, le fichier est lu en JavaScript.
-Le professeur encode le cours de l’examen et le matricule de l’étudiant.
-L’étudiant est autorisé uniquement si ce cours est présent dans son PAE.
-Le projet doit être lancé avec Live Server.
-
-## Travail de Sila
-
-* Ajout de `traiterScan(matricule, cours, autorise)`, appelée après la vérification du PAE.
-* Étudiant refusé : le bloc étudiant est vidé et rien n'est enregistré dans l'historique.
-* 1er scan d'un étudiant autorisé : photo affichée et heure de début enregistrée.
-* 2e scan : heure de fin enregistrée. 3e scan : message « déjà sorti ».
-* Préparation du squelette commun (bloc étudiant, bouton d'export, fonctions vides).
-
-### Travail de Jaouad
-
-- Ajout de l’affichage de la photo et du matricule de l’étudiant.
-- Les photos sont chargées depuis `photos/<matricule>.jpg`.
-- Une photo par défaut est affichée lorsque la photo est introuvable.
-- `viderEleve()` efface le bloc lorsqu’un étudiant est refusé.
-- Test : appeler `afficherEleve({ matricule: "65717", cours: [] })` dans la console.
+- L'historique est gardé dans le navigateur du professeur, pas dans une base de
+  données partagée entre plusieurs ordinateurs ou locaux.
+- Le matricule est tapé à la main : la lecture du QR code par caméra reste à faire.
+- Le PAE ne contient pas les noms : seuls la photo et le matricule sont affichés.
+- Les photos sont fictives.

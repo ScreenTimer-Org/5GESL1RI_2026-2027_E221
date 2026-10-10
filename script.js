@@ -96,53 +96,48 @@ function initMatricule(){
         localStorage.setItem('dernierCours', coursExamen);
         historique = chargerHistorique(coursExamen);
         afficherHistorique();
+
+        matricule = '';
+        statutActuel = false;
+        viderEleve();
+        const statut = document.getElementById('statut-etudiant');
+        statut.textContent = 'En attente de vérification';
+        statut.style.color = '';
     });
+}
+
+function peutModifier() {
+    if (!matricule || !statutActuel) {
+        alert("Cet étudiant n'a pas accès");
+        return false;
+    }
+
+    const fiche = historique[matricule];
+    if (fiche && fiche.fin !== '') {
+        alert("Cet étudiant est déjà sorti : sa fiche ne peut plus être modifiée");
+        return false;
+    }
+
+    return true;
 }
 
 
 // Bloc Horaires
 function initHoraires() {
 
-    document.getElementById("btn-debut").addEventListener("click", () => {
-        if (!matricule || !statutActuel) {
-            alert("This student doesn't have access");
-            return;
-        }
-        const heure = new Date().toLocaleTimeString();
-        logEvent(matricule,"Debut", heure);
-    });
-
-    document.getElementById("btn-fin").addEventListener("click", () => {
-        if (!matricule || !statutActuel) {
-            alert("This student doesn't have access");
-            return;
-        }
-        const heure = new Date().toLocaleTimeString();
-        logEvent(matricule,"Fin", heure);
-    });
-
     document.getElementById("btn-toilette").addEventListener("click", () => {
-        if (!matricule || !statutActuel) {
-            alert("This student doesn't have access");
-            return;
-        }
+        if (!peutModifier()) return;
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Toilette", heure);
     });
 
     document.getElementById("btn-triche").addEventListener("click", () => {
-        if (!matricule || !statutActuel) {
-            alert("This student doesn't have access");
-            return;
-        }
+        if (!peutModifier()) return;
         const heure = new Date().toLocaleTimeString();
         logEvent(matricule,"Triche", heure);
     });
 }
 
-
-// Partie Van Vo : sauvegarde / chargement / export (localStorage)
-// ============================================================
 
 function cleHistorique(cours) {
     return 'historique_' + cours;
@@ -209,7 +204,6 @@ function exporterCSV(cours){
 }
 
 
-// Ajouté par Jaouad
 function afficherPhotoParDefaut() {
     this.onerror = null;
     this.src = 'photos/default.jpg';
