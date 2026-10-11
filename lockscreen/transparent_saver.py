@@ -31,6 +31,7 @@ import os
 import select
 import signal
 import sys
+import time
 
 from Xlib import X, display, error
 from Xlib.ext import shape
@@ -89,6 +90,38 @@ def appliquer_forme(fond, rects):
                           0, 0, rects)
 
 
+def compositeur_en_jeu():
+    """Vrai si xsecurelock tourne dans la fenetre overlay d'un compositeur
+    (lock.sh met XSECURELOCK_NO_COMPOSITE=1 quand il n'y en a pas)."""
+    return os.environ.get("XSECURELOCK_NO_COMPOSITE") != "1"
+
+
+def forcer_repaint(d):
+    """Force le compositeur a redessiner TOUT l'ecran.
+
+    Avec un compositeur, les fenetres de xsecurelock vivent dans la fenetre
+    overlay. Quand on decoupe la fenetre noire avec XShape, les pixels de
+    l'overlay qu'elle recouvrait sont perdus, mais le compositeur ne
+    redessine que les zones « endommagees » (video, souris, horloge...) :
+    le reste reste noir. On provoque donc un dommage plein ecran en
+    affichant puis retirant aussitot une fenetre plein ecran.
+    """
+    ecran = d.screen()
+    try:
+        w = ecran.root.create_window(
+            0, 0, ecran.width_in_pixels, ecran.height_in_pixels, 0,
+            ecran.root_depth, X.InputOutput, X.CopyFromParent,
+            override_redirect=True, event_mask=0)
+        w.map()
+        d.sync()
+        w.unmap()
+        d.sync()
+        w.destroy()
+        d.sync()
+    except error.XError:
+        pass
+
+
 def main():
     fenetre_id = os.environ.get("XSCREENSAVER_WINDOW")
     if not fenetre_id:
@@ -125,6 +158,12 @@ def main():
                 appliquer_forme(fond, rects)
                 d.sync()
                 derniere = rects
+                if compositeur_en_jeu():
+                    # Deux passes : la 2e rattrape un repaint ignore ou
+                    # fait avant que le compositeur ait vu le changement.
+                    forcer_repaint(d)
+                    time.sleep(0.15)
+                    forcer_repaint(d)
 
             # Attend un evenement X ; reverification periodique par securite.
             if not d.pending_events():

@@ -42,8 +42,13 @@ FENETRE_TERMINAL=""
 
 trouver_fenetre_terminal() {
     command -v xdotool >/dev/null 2>&1 || return 0
-    if [ -n "${WINDOWID:-}" ]; then
-        FENETRE_TERMINAL="$WINDOWID"                  # posé par la plupart des terminaux
+    # WINDOWID n'est fiable que s'il est numérique, non nul et désigne une
+    # fenêtre existante : certains terminaux (qterminal sur Kali...) le posent
+    # à 0. Sinon, on se rabat sur la fenêtre active (si lancé depuis un terminal).
+    if [[ "${WINDOWID:-}" =~ ^(0x[0-9a-fA-F]+|[0-9]+)$ ]] \
+        && (( WINDOWID != 0 )) \
+        && xdotool getwindowname "$WINDOWID" >/dev/null 2>&1; then
+        FENETRE_TERMINAL="$WINDOWID"
     elif [ -t 0 ]; then
         FENETRE_TERMINAL="$(xdotool getactivewindow 2>/dev/null || true)"
     fi
