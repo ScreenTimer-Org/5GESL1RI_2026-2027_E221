@@ -27,7 +27,7 @@ for commande in apt sudo; do
 done
 
 # Vérifier que les fichiers du projet sont présents.
-for fichier in lock.sh saver.sh screensaver_overlay.py; do
+for fichier in lock.sh saver.sh transparent_saver.py; do
     if [ ! -f "$fichier" ]; then
         echo "Erreur : le fichier $fichier est manquant."
         exit 1
@@ -38,33 +38,29 @@ done
 sudo apt update
 
 # Installer les dépendances.
-# picom est le compositeur : c'est lui qui rend l'écran translucide pour
-# laisser voir le bureau en direct derrière.
 sudo apt install -y \
     python3 \
-    python3-tk \
+    python3-xlib \
     xsecurelock \
-    x11-utils \
-    picom \
+    xdotool \
     coreutils
 
 # Vérifier que les commandes du projet sont disponibles.
-for commande in python3 xsecurelock xwininfo timeout; do
+for commande in python3 xsecurelock xdotool timeout; do
     if ! command -v "$commande" >/dev/null 2>&1; then
         echo "Erreur : la commande $commande est manquante."
         exit 1
     fi
 done
 
-# Vérifier la bibliothèque Python nécessaire à l'affichage.
-if ! python3 -c "import tkinter"; then
-    echo "Erreur : le module tkinter est manquant."
+# Vérifier la bibliothèque Python nécessaire (X11 + extension SHAPE).
+if ! python3 -c "import Xlib; from Xlib.ext import shape"; then
+    echo "Erreur : la bibliothèque Python Xlib est manquante."
     exit 1
 fi
 
 # Rendre les scripts de lancement exécutables.
-chmod +x lock.sh saver.sh
+chmod +x lock.sh saver.sh transparent_saver.py
 
 echo "Installation terminée."
 echo "Tu peux maintenant lancer ./lock.sh depuis ce dossier."
-echo "Pour la transparence, picom doit tourner (par exemple : picom &)."
