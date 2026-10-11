@@ -1,0 +1,62 @@
+# Workflow's name
+name: Deploy to GitHub Pages
+
+# Trigger, executed when there is a push on main branch
+on:
+  push:
+    branches: [main]
+
+# GitHub token's permissions (deployment would be refused without it)
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Anti-collision for commits
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+
+jobs:
+  # First job named build, executed on a Ubuntu VM provided by GitHub
+  build:
+    runs-on: ubuntu-latest
+    
+    # GitHub uses VM by default, we create a container Bun
+    container:
+      image: oven/bun:latest  
+  
+    steps:
+      # Retrieve the code in the VM
+      - uses: actions/checkout@v4
+
+      # Install dependencies in the subfolder /screentimer
+      - name: Install dependencies
+        working-directory: screentimer
+        run: bun install --frozen-lockfile
+
+      # Launch the build Vite (generates /screentimer/dist folder with static files)
+      - name: Build
+        working-directory: screentimer
+        run: bunx vite build
+
+      # Prepare /dist folder as artefact to publish on Pages
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: screentimer/dist
+
+  # Second job named deploy, waits build before executing itself
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # Deployment environment; GitHub displays site's URL in the interface after deployment
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    #Publish the artefact on GitHub Pages
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
