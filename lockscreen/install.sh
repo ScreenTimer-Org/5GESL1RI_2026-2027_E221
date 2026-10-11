@@ -38,27 +38,27 @@ done
 sudo apt update
 
 # Installer les dépendances.
+# picom est le compositeur : c'est lui qui rend l'écran translucide pour
+# laisser voir le bureau en direct derrière.
 sudo apt install -y \
     python3 \
     python3-tk \
-    python3-pil \
-    python3-pil.imagetk \
     xsecurelock \
-    scrot \
     x11-utils \
+    picom \
     coreutils
 
 # Vérifier que les commandes du projet sont disponibles.
-for commande in python3 xsecurelock scrot xwininfo timeout mktemp; do
+for commande in python3 xsecurelock xwininfo timeout; do
     if ! command -v "$commande" >/dev/null 2>&1; then
         echo "Erreur : la commande $commande est manquante."
         exit 1
     fi
 done
 
-# Vérifier les bibliothèques Python nécessaires à l'affichage.
-if ! python3 -c "import tkinter; from PIL import Image, ImageEnhance, ImageFilter, ImageGrab, ImageTk"; then
-    echo "Erreur : une bibliothèque Python est manquante."
+# Vérifier la bibliothèque Python nécessaire à l'affichage.
+if ! python3 -c "import tkinter"; then
+    echo "Erreur : le module tkinter est manquant."
     exit 1
 fi
 
@@ -67,3 +67,4 @@ chmod +x lock.sh saver.sh
 
 echo "Installation terminée."
 echo "Tu peux maintenant lancer ./lock.sh depuis ce dossier."
+echo "Pour la transparence, picom doit tourner (par exemple : picom &)."

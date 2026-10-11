@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Verrouille l'ecran : capture du bureau, puis xsecurelock avec notre affichage.
+# Verrouille l'ecran avec xsecurelock et notre affichage (voile + horloge).
+# Le bureau continue de tourner en direct derriere : plus aucune capture.
 # Usage : ./lock.sh [--timeout N]
 #   --timeout N : tue xsecurelock apres N secondes (SECURITE POUR LES TESTS,
 #                 a ne pas utiliser en usage reel).
@@ -18,7 +19,7 @@ while [ $# -gt 0 ]; do
 done
 
 manquants=()
-for cmd in python3 xsecurelock scrot; do
+for cmd in python3 xsecurelock; do
     command -v "$cmd" >/dev/null 2>&1 || manquants+=("$cmd")
 done
 if [ ${#manquants[@]} -gt 0 ]; then
@@ -36,24 +37,20 @@ if [ -z "${DISPLAY:-}" ]; then
     exit 1
 fi
 
-# Dossier prive (droits 700) ; supprime a la sortie meme en cas d'erreur.
-umask 077
-WORKDIR="$(mktemp -d /tmp/lockscreen.XXXXXX)"
-trap 'rm -rf "$WORKDIR"' EXIT
-trap 'exit 130' INT
-trap 'exit 143' TERM HUP
-
-# Capture AVANT xsecurelock (sinon on photographierait sa fenetre noire).
-if scrot "$WORKDIR/capture.png" 2>/dev/null; then
-    export LOCKSCREEN_FOND="$WORKDIR/capture.png"
-else
-    echo "Avertissement : capture impossible, fond uni utilise." >&2
+# Sans compositeur actif (picom), la transparence est impossible : l'ecran
+# sera simplement opaque. C'est le repli prevu, on previent juste l'utilisateur.
+if ! pgrep -x picom >/dev/null 2>&1; then
+    echo "Avertissement : aucun compositeur (picom) detecte, l'ecran sera opaque." >&2
 fi
 
 export XSECURELOCK_SAVER="$DIR/saver.sh"
 # Saisie du mot de passe : "cursor" (defaut xsecurelock, curseur qui saute a chaque
 # touche, masque la longueur) ou "asterisks" (plus lisible, longueur visible).
 export XSECURELOCK_PASSWORD_PROMPT="${XSECURELOCK_PASSWORD_PROMPT:-asterisks}"
+# xsecurelock pose par defaut une fenetre noire supplementaire pour empecher
+# un compositeur de laisser voir le bureau. On la desactive, sinon la
+# transparence demandee par le client est impossible.
+export XSECURELOCK_COMPOSITE_OBSCURER="${XSECURELOCK_COMPOSITE_OBSCURER:-0}"
 
 if [ -n "$TIMEOUT" ]; then
     timeout "$TIMEOUT" xsecurelock || true
