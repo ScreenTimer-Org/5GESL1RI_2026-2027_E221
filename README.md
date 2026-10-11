@@ -40,6 +40,24 @@ dans une VM VMware, avec le bureau GNOME et une session X11.
 - Modification 2 : remplacement de `--alpha` par une capture du bureau (Pillow), floutée et assombrie, affichée dans un `Canvas` avec l'horloge par-dessus. Repli en fond uni si la capture échoue. Test Windows OK.
 - **Pas encore testé sur la VM** : fond flouté, à valider (session X11 ou Wayland ?).
 
+**2026-10-11**
+- Recherche transparence en temps réel (sans capture d'écran) pour répondre à
+  la demande du client de voir le bureau en direct (vidéo, jeu, etc.) derrière
+  l'écran de verrouillage.
+- Tests effectués sur VM Debian : GNOME natif, puis installation et test sous
+  XFCE avec compositeur activé manuellement (xfconf-query).
+- Diagnostic : rendu matériel disponible (glxinfo: direct rendering = Yes),
+  mais transparence reste bloquée même en isolant Tkinter seul, hors script et
+  hors xsecurelock.
+- Cause identifiée avec Zackary : xsecurelock bloque volontairement la
+  composition sur sa fenêtre (protection de sécurité par défaut).
+- Test des variables officielles xsecurelock (XSECURELOCK_NO_COMPOSITE,
+  XSECURELOCK_DIM_OVERRIDE_COMPOSITOR_DETECTION) : toujours opaque, testé en
+  parallèle sur ma VM et sur le Linux natif de Zackary.
+- Installation de picom, VirtualBox Guest Additions : sans effet, écarté.
+- Zackary a ensuite trouvé une piste fonctionnelle de son côté (fond visible
+  en direct avec xsecurelock), à valider avant de merger.
+
 
 **Reste à faire**
 1. Tester le fond flouté sur la VM (`echo $XDG_SESSION_TYPE`, puis `python3 lockscreen/screensaver_overlay.py --timeout 10`).
