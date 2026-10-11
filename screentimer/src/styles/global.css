@@ -1,9 +1,10 @@
 :root {
-  --bg: #eef1f5;
-  --surface: #ffffff;
-  --text: #121620;
-  --muted: #5a6273;
-  --border: #d9dee6;
+  /* Mode jour */
+  --bg: #f1f5f9;
+  --surface: #f6f1eb;
+  --text: #334155;
+  --muted: #64748b;
+  --border: #d8dee7;
   --accent: #2458d6;
   --warning: #b86e00;
   --danger: #c62828;
@@ -11,14 +12,29 @@
   --radius: 16px;
   --gap: clamp(12px, 1.8vw, 28px);
 
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: var(--text);
   background: var(--bg);
 }
 
+/* Thème sombre forcé par le switch */
+:root[data-theme='dark'] {
+  --bg: #0d1017;
+  --surface: #161b25;
+  --text: #eef1f6;
+  --muted: #97a0b3;
+  --border: #262d3b;
+  --accent: #6d95ff;
+  --warning: #ffb547;
+  --danger: #ff6b6b;
+  --success: #4cd08a;
+  color-scheme: dark;
+}
+
+/* Thème sombre suivi depuis l'OS */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #0d1017;
     --surface: #161b25;
     --text: #eef1f6;
@@ -28,6 +44,7 @@
     --warning: #ffb547;
     --danger: #ff6b6b;
     --success: #4cd08a;
+    color-scheme: dark;
   }
 }
 

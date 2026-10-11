@@ -24,12 +24,17 @@ export function Screen({ config, faq, faqStatus }: ScreenProps) {
     <div className={styles.screen}>
       <header className={styles.topbar}>
         <Logo src={config.logo} />
+        <div className={styles.topbarCenter}>{isExam && <TimerPanel config={config} size="compact" />}</div>
         <Clock />
       </header>
 
-      <main className={styles.main} data-layout={isExam ? 'split' : 'single'}>
-        <TimerPanel config={config} />
-        {isExam && <InfoPanel instructions={instructions} faq={faq} faqStatus={faqStatus} cycleSeconds={config.cycle} />}
+      {/* An exam needs room for the instructions and the FAQ; a break only shows the timer, in large. */}
+      <main className={styles.main}>
+        {isExam ? (
+          <InfoPanel instructions={instructions} faq={faq} faqStatus={faqStatus} cycleSeconds={config.cycle} />
+        ) : (
+          <TimerPanel config={config} size="large" />
+        )}
       </main>
     </div>
   )

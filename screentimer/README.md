@@ -76,7 +76,7 @@ The timer depends only on the config, so every class that opens the same URL sho
 
 ## Instructions and FAQ
 
-Both share one panel, which takes half the screen and rotates every `cycle` seconds. It is always shown in exam mode. It shows only the instructions while the FAQ is empty; without instructions, it always shows the FAQ, with a placeholder while it is empty. Once questions appear on the pad, it cycles through the instructions and the FAQ, split into as many pages as it takes for every Q&A to fit on screen.
+In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. The FAQ is split into as many pages as it takes for every Q&A to fit on screen, and rotates every `cycle` seconds; the ⏸ button in its header pauses the rotation on this screen. In break mode, only the timer is shown, in large.
 
 ## FAQ format
 
