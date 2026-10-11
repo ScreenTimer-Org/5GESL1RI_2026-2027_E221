@@ -76,7 +76,7 @@ The timer depends only on the config, so every class that opens the same URL sho
 
 ## Instructions and FAQ
 
-In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. The FAQ is split into as many pages as it takes for every Q&A to fit on screen, and rotates every `cycle` seconds; the ⏸ button in its header pauses the rotation on this screen. In break mode, only the timer is shown, in large.
+In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. Each panel is split into as many pages as it takes for its content to fit on screen, and rotates every `cycle` seconds. The instructions are split between lines: a heading always stays with its first instruction, and the numbering carries on from one page to the next. When a panel has several pages, the ⏸ button in its header pauses its rotation on this screen, independently of the other panel. In break mode, only the timer is shown, in large.
 
 ## Markdown
 

@@ -1,5 +1,4 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { FaqEntry } from './parseFaq'
 
 /** Greedily packs items of the given heights into pages; returns item counts. */
 export function paginate(heights: number[], gap: number, available: number): number[] {
@@ -36,18 +35,19 @@ function chunk<T>(items: readonly T[], sizes: number[]): T[][] {
 }
 
 /**
- * Splits FAQ entries into pages that fit the viewport. The entries are
- * rendered once, hidden, into `measureRef` so their real heights are known,
- * and pages are recomputed whenever the viewport or the content resizes.
+ * Splits items into pages that fit the viewport. All the items are rendered
+ * once, hidden, as a list inside `measureRef` whose children are the items,
+ * one each, so their real heights are known. Pages are recomputed whenever
+ * the viewport or the content resizes.
  */
-export function useFaqPages(entries: FaqEntry[]) {
+export function usePages<T>(items: readonly T[]) {
   const viewportRef = useRef<HTMLDivElement>(null)
-  const measureRef = useRef<HTMLDListElement>(null)
+  const measureRef = useRef<HTMLDivElement>(null)
   const [sizes, setSizes] = useState<number[]>([])
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
-    const list = measureRef.current
+    const list = measureRef.current?.firstElementChild
     if (!viewport || !list) return
 
     const observer = new ResizeObserver(() => {
@@ -58,8 +58,8 @@ export function useFaqPages(entries: FaqEntry[]) {
     observer.observe(viewport)
     observer.observe(list)
     return () => observer.disconnect()
-  }, [entries])
+  }, [items])
 
-  const pages = useMemo(() => chunk(entries, sizes), [entries, sizes])
+  const pages = useMemo(() => chunk(items, sizes), [items, sizes])
   return { viewportRef, measureRef, pages }
 }
