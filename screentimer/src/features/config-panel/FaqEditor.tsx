@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import { questionKey } from '../../sources/faqEdits'
 import type { ScreenData } from '../../sources/useScreenData'
 import { MAX_FAQ_ENTRIES, validateFaqEntry } from '../faq/parseFaq'
 import styles from './ConfigPanel.module.css'
+import { MarkdownToolbar } from './MarkdownToolbar'
 
 /** Hides questions of the FAQ source and adds questions, on this screen only. */
 export function FaqEditor({ data }: { data: ScreenData }) {
@@ -13,6 +14,8 @@ export function FaqEditor({ data }: { data: ScreenData }) {
   const [answer, setAnswer] = useState('')
   const [error, setError] = useState('')
   const full = added.length >= MAX_FAQ_ENTRIES
+  const questionInput = useRef<HTMLInputElement>(null)
+  const answerInput = useRef<HTMLTextAreaElement>(null)
 
   const add = (e: FormEvent) => {
     e.preventDefault()
@@ -56,12 +59,29 @@ export function FaqEditor({ data }: { data: ScreenData }) {
 
       <form className={styles.form} onSubmit={add}>
         <div className={styles.field} data-wide={true}>
-          <label htmlFor="faq-question">Nouvelle question</label>
-          <input id="faq-question" value={question} onChange={(e) => setQuestion(e.target.value)} />
+          <div className={styles.fieldHeader}>
+            <label htmlFor="faq-question">Nouvelle question</label>
+            <MarkdownToolbar target={questionInput} onEdit={setQuestion} />
+          </div>
+          <input
+            id="faq-question"
+            ref={questionInput}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
         </div>
         <div className={styles.field} data-wide={true}>
-          <label htmlFor="faq-answer">Réponse (vide : en attente)</label>
-          <textarea id="faq-answer" rows={3} value={answer} onChange={(e) => setAnswer(e.target.value)} />
+          <div className={styles.fieldHeader}>
+            <label htmlFor="faq-answer">Réponse (vide : en attente)</label>
+            <MarkdownToolbar target={answerInput} onEdit={setAnswer} headings />
+          </div>
+          <textarea
+            id="faq-answer"
+            ref={answerInput}
+            rows={3}
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+          />
         </div>
         <div className={styles.inline}>
           <button type="submit" disabled={!question.trim() || full}>

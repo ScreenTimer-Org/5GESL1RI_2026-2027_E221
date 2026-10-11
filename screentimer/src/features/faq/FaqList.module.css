@@ -17,7 +17,6 @@
 
 .answer {
   margin: 0.3rem 0 0;
-  white-space: pre-line;
   color: var(--muted);
 }
 

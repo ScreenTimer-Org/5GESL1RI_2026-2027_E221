@@ -226,3 +226,21 @@
   border: 1px solid var(--accent);
   border-radius: 999px;
 }
+
+.fieldTools {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.toolbar button {
+  min-width: 1.75rem;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}

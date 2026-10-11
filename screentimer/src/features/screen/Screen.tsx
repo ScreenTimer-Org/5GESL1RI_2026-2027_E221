@@ -3,7 +3,7 @@ import type { AppConfig } from '../../config/schema'
 import type { SourceState } from '../../sources/useSource'
 import type { FaqEntry } from '../faq/parseFaq'
 import { InfoPanel } from '../info/InfoPanel'
-import { toInstructionItems } from '../instructions/toInstructionItems'
+import { toInstructionGroups } from '../instructions/toInstructionGroups'
 import { TimerPanel } from '../timer/TimerPanel'
 import { Clock } from './Clock'
 import { Logo } from './Logo'
@@ -18,7 +18,7 @@ interface ScreenProps {
 /** Components that tick (Clock, TimerPanel) own their clock, so the info panel is not re-rendered every second. */
 export function Screen({ config, faq, faqStatus }: ScreenProps) {
   const isExam = config.mode === 'exam'
-  const instructions = useMemo(() => toInstructionItems(config.instructions), [config.instructions])
+  const instructions = useMemo(() => toInstructionGroups(config.instructions), [config.instructions])
 
   return (
     <div className={styles.screen}>

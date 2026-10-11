@@ -6,11 +6,12 @@ import { FaqStatus } from '../faq/FaqStatus'
 import type { FaqEntry } from '../faq/parseFaq'
 import { useFaqPages } from '../faq/useFaqPages'
 import { InstructionList } from '../instructions/InstructionList'
+import type { InstructionGroup } from '../instructions/toInstructionGroups'
 import styles from './InfoPanel.module.css'
 import { PageIndicator } from './PageIndicator'
 
 interface InfoPanelProps {
-  instructions: string[]
+  instructions: InstructionGroup[]
   faq: FaqEntry[]
   faqStatus: SourceState
   cycleSeconds: number
@@ -26,7 +27,7 @@ export function InfoPanel({ instructions, faq, faqStatus, cycleSeconds }: InfoPa
   )
 }
 
-function InstructionsPanel({ instructions }: { instructions: string[] }) {
+function InstructionsPanel({ instructions }: { instructions: InstructionGroup[] }) {
   return (
     <section className={styles.panel}>
       <header className={styles.header}>
@@ -34,7 +35,7 @@ function InstructionsPanel({ instructions }: { instructions: string[] }) {
       </header>
       <div className={styles.viewport}>
         {instructions.length > 0 ? (
-          <InstructionList items={instructions} />
+          <InstructionList groups={instructions} />
         ) : (
           <p className={styles.empty}>Aucune consigne.</p>
         )}
