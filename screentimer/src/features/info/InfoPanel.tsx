@@ -9,8 +9,6 @@ import { InstructionList } from '../instructions/InstructionList'
 import styles from './InfoPanel.module.css'
 import { PageIndicator } from './PageIndicator'
 
-type Page = { kind: 'instructions' } | { kind: 'faq'; entries: FaqEntry[]; number: number; total: number }
-
 interface InfoPanelProps {
   instructions: string[]
   faq: FaqState
@@ -18,39 +16,56 @@ interface InfoPanelProps {
 }
 
 export function InfoPanel({ instructions, faq, cycleSeconds }: InfoPanelProps) {
+  return (
+    <div className={styles.split}>
+      <InstructionsPanel instructions={instructions} />
+      <FaqPanel faq={faq} cycleSeconds={cycleSeconds} />
+    </div>
+  )
+}
+
+function InstructionsPanel({ instructions }: { instructions: string[] }) {
+  return (
+    <section className={styles.panel}>
+      <header className={styles.header}>
+        <h2 className={styles.title}>Consignes</h2>
+      </header>
+      <div className={styles.viewport}>
+        {instructions.length > 0 ? (
+          <InstructionList items={instructions} />
+        ) : (
+          <p className={styles.empty}>Aucune consigne.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function FaqPanel({ faq, cycleSeconds }: { faq: FaqState; cycleSeconds: number }) {
   const { viewportRef, measureRef, pages: faqPages } = useFaqPages(faq.entries)
   const [paused, setPaused] = useState(false)
 
-  const pages = useMemo<Page[]>(() => {
-    const hasInstructions = instructions.length > 0
-    const faqContent = faqPages.length > 0 ? faqPages : hasInstructions ? [] : [[]]
-    return [
-      ...(hasInstructions ? [{ kind: 'instructions' as const }] : []),
-      ...faqContent.map((entries, i, all) => ({
-        kind: 'faq' as const,
-        entries,
-        number: i + 1,
-        total: all.length,
-      })),
-    ]
-  }, [instructions.length, faqPages])
+  const pages = useMemo<FaqEntry[][]>(
+    () => (faqPages.length > 0 ? faqPages : [[]]),
+    [faqPages],
+  )
 
   const index = useCycle(pages.length, cycleSeconds, paused)
-  const page = pages[index]
+  const entries = pages[index] ?? []
 
   return (
     <section className={styles.panel}>
       <header className={styles.header}>
         <h2 className={styles.title}>
-          {page?.kind === 'faq' ? 'Questions fréquentes' : 'Consignes'}
-          {page?.kind === 'faq' && page.total > 1 && (
+          Questions fréquentes
+          {pages.length > 1 && (
             <span className={styles.counter}>
-              {page.number}/{page.total}
+              {index + 1}/{pages.length}
             </span>
           )}
         </h2>
         <div className={styles.headerActions}>
-          {page?.kind === 'faq' && <FaqStatus faq={faq} />}
+          <FaqStatus faq={faq} />
           <button
             type="button"
             className={styles.pauseButton}
@@ -64,17 +79,13 @@ export function InfoPanel({ instructions, faq, cycleSeconds }: InfoPanelProps) {
       </header>
 
       <div ref={viewportRef} className={styles.viewport}>
-        {page && (
-          <div key={index} className={styles.page}>
-            {page.kind === 'instructions' ? (
-              <InstructionList items={instructions} />
-            ) : page.entries.length > 0 ? (
-              <FaqList entries={page.entries} />
-            ) : (
-              <p className={styles.empty}>Aucune question pour le moment.</p>
-            )}
-          </div>
-        )}
+        <div key={index} className={styles.page}>
+          {entries.length > 0 ? (
+            <FaqList entries={entries} />
+          ) : (
+            <p className={styles.empty}>Aucune question pour le moment.</p>
+          )}
+        </div>
         {faq.entries.length > 0 && (
           <div className={styles.measure} aria-hidden>
             <FaqList ref={measureRef} entries={faq.entries} />

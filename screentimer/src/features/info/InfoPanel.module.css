@@ -1,3 +1,11 @@
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  height: 100%;
+  min-height: 0;
+}
+
 .panel {
   display: flex;
   flex-direction: column;
@@ -85,5 +93,13 @@
 @media (prefers-reduced-motion: reduce) {
   .page {
     animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(50vh, auto);
+    height: auto;
   }
 }
