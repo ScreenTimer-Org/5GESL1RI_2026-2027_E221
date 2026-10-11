@@ -1,4 +1,5 @@
 import * as v from 'valibot'
+import { stripUnsafeChars } from '../utils/safeText'
 import { isTimeOfDay } from '../utils/time'
 import { isSafeUrl } from './safeUrl'
 
@@ -30,7 +31,9 @@ const integer = ({ min, max }: Bounds) =>
     v.maxValue(max, `Maximum ${max}`),
   )
 
-const text = (max: number) => v.pipe(v.string(), v.maxLength(max, `${max} caractères maximum`))
+/** Config texts can come from a pad: they get the same cleaning as the FAQ. */
+const text = (max: number) =>
+  v.pipe(v.string(), v.transform(stripUnsafeChars), v.maxLength(max, `${max} caractères maximum`))
 
 const url = v.pipe(
   v.string(),
@@ -62,7 +65,7 @@ export const configSchema = v.object({
   minStay: integer(LIMITS.minStay),
   /** Minutes before the end when the timer switches to its warning state. */
   warning: integer(LIMITS.warning),
-  /** One instruction per line. */
+  /** One instruction per line, in Markdown; a `# heading` line starts a new group. */
   instructions: text(5000),
   /** Polling interval of the config and FAQ sources, in seconds. */
   refresh: integer(LIMITS.refresh),
@@ -91,7 +94,8 @@ export const DEFAULT_CONFIG: AppConfig = {
   cycle: 15,
 }
 
-export type FieldKind = 'text' | 'url' | 'textarea' | 'number' | 'time' | 'select'
+/** `markdown`: a textarea with the Markdown toolbar. */
+export type FieldKind = 'text' | 'url' | 'textarea' | 'markdown' | 'number' | 'time' | 'select'
 
 export interface FieldDef {
   key: ConfigKey
@@ -121,6 +125,6 @@ export const CONFIG_FIELDS: readonly FieldDef[] = [
   { key: 'warning', label: 'Alerte de fin (min)', kind: 'number', ...LIMITS.warning },
   { key: 'cycle', label: 'Rotation des pages (s)', kind: 'number', ...LIMITS.cycle },
   { key: 'logo', label: 'Logo (lien)', kind: 'url' },
-  { key: 'instructions', label: 'Consignes (une par ligne)', kind: 'textarea' },
+  { key: 'instructions', label: 'Consignes (une par ligne)', kind: 'markdown' },
   { key: 'refresh', label: 'Rafraîchissement des sources (s)', kind: 'number', ...LIMITS.refresh },
 ]

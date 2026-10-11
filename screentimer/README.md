@@ -68,7 +68,7 @@ Example: `?src=https://hebdo.framapad.org/p/xyz&room=B204&start=14:00`
 | `minStay`      | minutes              | Delay after the start before students may leave    |
 | `warning`      | minutes              | Remaining time at which the timer turns orange     |
 | `logo`         | http(s) link         | School logo (or a path relative to the page)       |
-| `instructions` | text                 | One instruction per line                           |
+| `instructions` | Markdown             | One instruction per line (see Markdown below)      |
 | `refresh`      | seconds (≥ 60)       | Source polling interval (see rate limiting below)  |
 | `cycle`        | seconds (≥ 3)        | Time each instructions / FAQ page stays on screen  |
 
@@ -76,7 +76,21 @@ The timer depends only on the config, so every class that opens the same URL sho
 
 ## Instructions and FAQ
 
-In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. The FAQ is split into as many pages as it takes for every Q&A to fit on screen, and rotates every `cycle` seconds; the ⏸ button in its header pauses the rotation on this screen. In break mode, only the timer is shown, in large.
+In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. Each panel is split into as many pages as it takes for its content to fit on screen, and rotates every `cycle` seconds. The instructions are split between lines: a heading always stays with its first instruction, and the numbering carries on from one page to the next. When a panel has several pages, the ⏸ button in its header pauses its rotation on this screen, independently of the other panel. In break mode, only the timer is shown, in large.
+
+## Markdown
+
+The instructions and the FAQ accept a small Markdown subset, parsed by `src/markdown/parseMarkdown.ts`:
+
+| Syntax                     | Result                          | Where                                      |
+| -------------------------- | ------------------------------- | ------------------------------------------ |
+| `# Title`, `## …`, `### …` | Heading (deeper levels as `###`) | Instructions, FAQ answers                  |
+| `**bold**`                 | **bold**                        | Everywhere                                 |
+| `*italic*`                 | *italic*                        | Everywhere                                 |
+| `***both***`               | ***both***                      | Everywhere                                 |
+| `\*`, `\#`, `\\`          | The character itself            | Everywhere                                 |
+
+Anything else (links, lists, HTML…) stays plain text, and so does italic nested inside bold nested inside italic (`*a **b *c* b** a*`). In the instructions, every other line is a numbered instruction, and a heading starts a new group numbered from 1. The **T**, **G** and *I* buttons of the settings panel insert this syntax around the selection.
 
 ## FAQ format
 
@@ -92,7 +106,7 @@ The `faq` value of a source is a list:
 }
 ```
 
-- Every object has exactly two text fields, `question` (not empty) and `answer` (may be empty: the question is shown as pending). `\n` starts a new line.
+- Every object has exactly two text fields, `question` (not empty) and `answer` (may be empty: the question is shown as pending). `\n` starts a new line, an empty line a new paragraph. Questions accept bold and italic, answers headings too.
 - Anything else (missing or extra field, wrong type, more than 200 entries, unknown top-level key) makes the whole document invalid. Invalid config values, on the other hand, are dropped one by one.
 - While a source is invalid (typically while a teacher is typing in the pad), screens keep showing its last valid version with the status « Source en cours de modification (JSON invalide) ».
 
@@ -111,7 +125,7 @@ The app never overlaps requests, gives up on a request after 15 s, doubles the i
 - Every config input (URL, source, config panel) is validated field by field with the valibot schema in `src/config/schema.ts`. Invalid values are dropped and the rest of the config is kept.
 - `logo` and source links only accept `http(s)` links or relative paths. `javascript:`, `data:` and similar URLs are rejected. The logo is loaded as an `<img>` without sending a referrer, and it is hidden if it fails to load.
 - Sources may live on any origin. This gives a shared link no more power than its own query parameters already have: a source can only set config values and FAQ text, which go through the same validation.
-- Sources are fetched without cookies or referrer. Text from the config and the sources is rendered as text, never as HTML. The built page also ships a Content-Security-Policy.
+- Sources are fetched without cookies or referrer. Text from the config and the sources is rendered as text, never as HTML: Markdown is parsed into a tree of plain strings, rendered as React elements. The built page also ships a Content-Security-Policy.
 
 ## Gitlab page
 

@@ -1,17 +1,11 @@
 import * as v from 'valibot'
+import { stripUnsafeChars } from '../../utils/safeText'
 
 export const MAX_FAQ_ENTRIES = 200
 const MAX_FIELD_LENGTH = 2_000
 
-/**
- * Control characters (except tab and newline) and Unicode bidi overrides,
- * which could visually reorder or hide text on screen.
- */
-// eslint-disable-next-line no-control-regex -- matching control characters is the point
-const UNSAFE_CHARS = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F‎‏‪-‮⁦-⁩]/g
-
 function clean(text: string): string {
-  const trimmed = text.replace(UNSAFE_CHARS, '').trim()
+  const trimmed = stripUnsafeChars(text).trim()
   return trimmed.length > MAX_FIELD_LENGTH ? `${trimmed.slice(0, MAX_FIELD_LENGTH)}…` : trimmed
 }
 
