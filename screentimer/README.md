@@ -127,6 +127,6 @@ The app never overlaps requests, gives up on a request after 15 s, doubles the i
 - Sources may live on any origin. This gives a shared link no more power than its own query parameters already have: a source can only set config values and FAQ text, which go through the same validation.
 - Sources are fetched without cookies or referrer. Text from the config and the sources is rendered as text, never as HTML: Markdown is parsed into a tree of plain strings, rendered as React elements. The built page also ships a Content-Security-Policy.
 
-## Gitlab page
+## Gitlab/Github page
 
-The .gitlab-ci.yml file has a job to build the bundled page using vite and push it as a Gitlab page
+The .gitlab-ci.yml file has a job to build the bundled page using vite and push it as a Gitlab page. The github workflow does the same and is ran when Gitlab pushes the repo to the mirror Github repo
