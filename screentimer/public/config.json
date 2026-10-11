@@ -1,0 +1,14 @@
+{
+  "mode": "exam",
+  "course": "",
+  "room": "",
+  "logo": "logo.png",
+  "duration": 120,
+  "start": "",
+  "minStay": 30,
+  "warning": 10,
+  "instructions": "",
+  "pad": "",
+  "faqRefresh": 60,
+  "cycle": 15
+}

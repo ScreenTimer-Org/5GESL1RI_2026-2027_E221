@@ -1,0 +1,32 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin: 0;
+}
+
+.entry {
+  padding-left: 0.85rem;
+  border-left: 4px solid var(--accent);
+}
+
+.question {
+  font-weight: 600;
+  white-space: pre-line;
+}
+
+.answer {
+  margin: 0.3rem 0 0;
+  white-space: pre-line;
+  color: var(--muted);
+}
+
+.status {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.status[data-error] {
+  color: var(--danger);
+}
