@@ -104,22 +104,44 @@ def forcer_repaint(d):
     l'overlay qu'elle recouvrait sont perdus, mais le compositeur ne
     redessine que les zones « endommagees » (video, souris, horloge...) :
     le reste reste noir. On provoque donc un dommage plein ecran en
-    affichant puis retirant aussitot une fenetre plein ecran.
+    affichant puis retirant aussitot des fenetres qui, ensemble, couvrent
+    l'ecran.
+
+    On utilise une grille de petites fenetres plutot qu'une seule fenetre
+    plein ecran : certains compositeurs (xfwm4) « deredirigent » l'overlay
+    pour une fenetre plein ecran, ce qui fait demapper l'overlay de
+    xsecurelock (« Someone unmapped the composite overlay window »).
     """
     ecran = d.screen()
+    largeur, hauteur = ecran.width_in_pixels, ecran.height_in_pixels
+    colonnes, lignes = 3, 3
+    fenetres = []
     try:
-        w = ecran.root.create_window(
-            0, 0, ecran.width_in_pixels, ecran.height_in_pixels, 0,
-            ecran.root_depth, X.InputOutput, X.CopyFromParent,
-            override_redirect=True, event_mask=0)
-        w.map()
+        for i in range(colonnes):
+            x0, x1 = largeur * i // colonnes, largeur * (i + 1) // colonnes
+            for j in range(lignes):
+                y0, y1 = hauteur * j // lignes, hauteur * (j + 1) // lignes
+                if x1 <= x0 or y1 <= y0:
+                    continue
+                fenetres.append(ecran.root.create_window(
+                    x0, y0, x1 - x0, y1 - y0, 0, ecran.root_depth,
+                    X.InputOutput, X.CopyFromParent,
+                    override_redirect=True, event_mask=0))
+        for w in fenetres:
+            w.map()
         d.sync()
-        w.unmap()
-        d.sync()
-        w.destroy()
+        for w in fenetres:
+            w.unmap()
         d.sync()
     except error.XError:
         pass
+    finally:
+        for w in fenetres:
+            try:
+                w.destroy()
+            except error.XError:
+                pass
+        d.sync()
 
 
 def main():
