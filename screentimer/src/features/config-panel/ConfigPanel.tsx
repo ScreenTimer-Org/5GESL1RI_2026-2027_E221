@@ -1,19 +1,21 @@
 import { useEffect } from 'react'
 import { validateField } from '../../config/codec'
-import { CONFIG_FIELDS, type AppConfig, type ConfigKey, type ConfigPatch } from '../../config/schema'
+import { CONFIG_FIELDS, type ConfigKey } from '../../config/schema'
+import type { ScreenData } from '../../sources/useScreenData'
 import { ConfigActions } from './ConfigActions'
 import { ConfigField } from './ConfigField'
 import styles from './ConfigPanel.module.css'
+import { FaqEditor } from './FaqEditor'
+import { SourcesSection } from './SourcesSection'
 
 interface ConfigPanelProps {
-  config: AppConfig
-  onChange: (patch: ConfigPatch) => void
-  onReplace: (patch: ConfigPatch) => void
-  onReset: () => void
+  data: ScreenData
   onClose: () => void
 }
 
-export function ConfigPanel({ config, onChange, onReplace, onReset, onClose }: ConfigPanelProps) {
+export function ConfigPanel({ data, onClose }: ConfigPanelProps) {
+  const { config, base, page, actions } = data
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -25,7 +27,7 @@ export function ConfigPanel({ config, onChange, onReplace, onReset, onClose }: C
   const changeField = (key: ConfigKey, raw: string): string | null => {
     const result = validateField(key, raw)
     if (!result.ok) return result.error
-    onChange({ [key]: result.value })
+    actions.override({ [key]: result.value })
     return null
   }
 
@@ -38,18 +40,28 @@ export function ConfigPanel({ config, onChange, onReplace, onReset, onClose }: C
         </button>
       </header>
 
-      <ConfigActions config={config} onChange={onChange} onReplace={onReplace} onReset={onReset} />
+      <ConfigActions data={data} />
 
-      <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-        {CONFIG_FIELDS.map((field) => (
-          <ConfigField
-            key={field.key}
-            field={field}
-            value={config[field.key]}
-            onChange={(raw) => changeField(field.key, raw)}
-          />
-        ))}
-      </form>
+      <SourcesSection data={data} />
+
+      <section className={styles.section}>
+        <h3>Réglages</h3>
+        <p className={styles.hint}>Les valeurs modifiées ici remplacent celles de la source sur cet écran.</p>
+        <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
+          {CONFIG_FIELDS.map((field) => (
+            <ConfigField
+              key={field.key}
+              field={field}
+              value={config[field.key]}
+              sourceValue={Object.hasOwn(page.overrides, field.key) ? base[field.key] : undefined}
+              onChange={(raw) => changeField(field.key, raw)}
+              onReset={() => actions.clearOverride(field.key)}
+            />
+          ))}
+        </form>
+      </section>
+
+      <FaqEditor data={data} />
     </aside>
   )
 }

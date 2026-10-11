@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import { useCycle } from '../../hooks/useCycle'
+import type { SourceState } from '../../sources/useSource'
 import { FaqList } from '../faq/FaqList'
 import { FaqStatus } from '../faq/FaqStatus'
 import type { FaqEntry } from '../faq/parseFaq'
-import type { FaqState } from '../faq/useEtherpadFaq'
 import { useFaqPages } from '../faq/useFaqPages'
 import { InstructionList } from '../instructions/InstructionList'
 import styles from './InfoPanel.module.css'
@@ -13,7 +13,8 @@ type Page = { kind: 'instructions' } | { kind: 'faq'; entries: FaqEntry[]; numbe
 
 interface InfoPanelProps {
   instructions: string[]
-  faq: FaqState
+  faq: FaqEntry[]
+  faqStatus: SourceState
   cycleSeconds: number
 }
 
@@ -22,8 +23,8 @@ interface InfoPanelProps {
  * An empty FAQ is hidden, unless there are no instructions: the panel then
  * shows the FAQ's empty state instead of nothing.
  */
-export function InfoPanel({ instructions, faq, cycleSeconds }: InfoPanelProps) {
-  const { viewportRef, measureRef, pages: faqPages } = useFaqPages(faq.entries)
+export function InfoPanel({ instructions, faq, faqStatus, cycleSeconds }: InfoPanelProps) {
+  const { viewportRef, measureRef, pages: faqPages } = useFaqPages(faq)
 
   const pages = useMemo<Page[]>(() => {
     const hasInstructions = instructions.length > 0
@@ -53,7 +54,7 @@ export function InfoPanel({ instructions, faq, cycleSeconds }: InfoPanelProps) {
             </span>
           )}
         </h2>
-        {page?.kind === 'faq' && <FaqStatus faq={faq} />}
+        {page?.kind === 'faq' && <FaqStatus status={faqStatus} />}
       </header>
 
       <div ref={viewportRef} className={styles.viewport}>
@@ -68,9 +69,9 @@ export function InfoPanel({ instructions, faq, cycleSeconds }: InfoPanelProps) {
             )}
           </div>
         )}
-        {faq.entries.length > 0 && (
+        {faq.length > 0 && (
           <div className={styles.measure} aria-hidden>
-            <FaqList ref={measureRef} entries={faq.entries} />
+            <FaqList ref={measureRef} entries={faq} />
           </div>
         )}
       </div>

@@ -1,74 +1,53 @@
-import { useRef, useState, type ChangeEvent } from 'react'
-import type { AppConfig, ConfigPatch } from '../../config/schema'
+import { useState } from 'react'
+import { serializeDocument } from '../../sources/document'
+import { parseSource } from '../../sources/sourceSpec'
+import type { ScreenData } from '../../sources/useScreenData'
 import { toTimeOfDay } from '../../utils/time'
-import { newWeeklyFramapadUrl } from '../faq/framapad'
 import styles from './ConfigPanel.module.css'
-import { downloadConfig, readConfigFile } from './configFile'
+import { copyText, downloadText, fileName } from './download'
 
-interface ConfigActionsProps {
-  config: AppConfig
-  onChange: (patch: ConfigPatch) => void
-  onReplace: (patch: ConfigPatch) => void
-  onReset: () => void
-}
-
-export function ConfigActions({ config, onChange, onReplace, onReset }: ConfigActionsProps) {
-  const fileInput = useRef<HTMLInputElement>(null)
+export function ConfigActions({ data }: { data: ScreenData }) {
+  const { config, faq, page, actions } = data
   const [message, setMessage] = useState('')
 
-  const importFile = async (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    e.target.value = ''
-    if (!file) return
-    try {
-      const { config: imported, invalid } = await readConfigFile(file)
-      onReplace(imported)
-      setMessage(invalid.length > 0 ? `Importé. Champs invalides ignorés : ${invalid.join(', ')}` : 'Configuration importée')
-    } catch {
-      setMessage('Fichier JSON invalide')
-    }
-  }
-
-  /** Opening the link is what makes Framapad create the pad. */
-  const createFramapad = () => {
-    const pad = newWeeklyFramapadUrl()
-    onChange({ pad })
-    window.open(pad, '_blank', 'noopener,noreferrer')
-    setMessage('Pad créé pour une semaine')
-  }
+  const hasLocalChanges =
+    Object.keys(page.overrides).length > 0 || page.faqEdits.added.length > 0 || page.faqEdits.hidden.length > 0
+  const usesUpload = [page.configSource, page.faqSource].some((spec) => parseSource(spec).kind === 'upload')
 
   const copyLink = async () => {
-    setMessage((await copyText(window.location.href)) ? 'Lien copié' : 'Copie impossible')
+    if (!(await copyText(window.location.href))) setMessage('Copie impossible')
+    else setMessage(usesUpload ? 'Lien copié, sans le fichier importé (il reste sur cet appareil)' : 'Lien copié')
+  }
+
+  /** What the screen shows, ready to be pasted into a pad or served as a file. */
+  const copyJson = async () => {
+    setMessage((await copyText(serializeDocument(config, faq))) ? 'JSON copié' : 'Copie impossible')
   }
 
   return (
     <div className={styles.actions}>
       <div className={styles.buttons}>
-        <button type="button" data-primary onClick={() => onChange({ start: toTimeOfDay(new Date()) })}>
+        <button type="button" data-primary onClick={() => actions.override({ start: toTimeOfDay(new Date()) })}>
           Démarrer maintenant
         </button>
-        <button type="button" onClick={() => onChange({ start: '' })} disabled={!config.start}>
+        <button type="button" onClick={() => actions.override({ start: '' })} disabled={!config.start}>
           Arrêter
         </button>
       </div>
       <div className={styles.buttons}>
-        <button type="button" onClick={() => downloadConfig(config)}>
-          Exporter JSON
-        </button>
-        <button type="button" onClick={() => fileInput.current?.click()}>
-          Importer JSON
-        </button>
-        <button type="button" onClick={createFramapad}>
-          Nouveau Framapad (1 semaine)
-        </button>
         <button type="button" onClick={copyLink}>
           Copier le lien
         </button>
-        <button type="button" onClick={onReset}>
-          Réinitialiser
+        <button type="button" onClick={() => downloadText(serializeDocument(config, faq), fileName(config.course))}>
+          Exporter JSON
+        </button>
+        <button type="button" onClick={copyJson}>
+          Copier JSON
+        </button>
+        <button type="button" onClick={actions.resetLocal} disabled={!hasLocalChanges}>
+          Annuler les modifications locales
         </button>
       </div>
-      <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={importFile} />
       {message && (
         <p className={styles.message} role="status">
           {message}
@@ -76,13 +55,4 @@ export function ConfigActions({ config, onChange, onReplace, onReset }: ConfigAc
       )}
     </div>
   )
-}
-
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    return false
-  }
 }

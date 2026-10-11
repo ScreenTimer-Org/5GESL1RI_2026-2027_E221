@@ -5,15 +5,19 @@ import styles from './ConfigPanel.module.css'
 interface ConfigFieldProps {
   field: FieldDef
   value: string | number
+  /** Value from the config source, when this field overrides it. */
+  sourceValue?: string | number
   /** Validates and applies the raw input; returns an error message when rejected. */
   onChange: (raw: string) => string | null
+  /** Drops the override and goes back to the source value. */
+  onReset: () => void
 }
 
 /**
  * Keeps a local draft so the user can type through transient invalid states
  * (empty number, half-typed link). Only valid values reach the config.
  */
-export function ConfigField({ field, value, onChange }: ConfigFieldProps) {
+export function ConfigField({ field, value, sourceValue, onChange, onReset }: ConfigFieldProps) {
   const id = useId()
   const errorId = `${id}-error`
   const [draft, setDraft] = useState(String(value))
@@ -41,7 +45,20 @@ export function ConfigField({ field, value, onChange }: ConfigFieldProps) {
 
   return (
     <div className={styles.field} data-wide={field.kind === 'textarea' || field.kind === 'url'}>
-      <label htmlFor={id}>{field.label}</label>
+      <div className={styles.fieldHeader}>
+        <label htmlFor={id}>{field.label}</label>
+        {sourceValue !== undefined && (
+          <button
+            type="button"
+            className={styles.reset}
+            onClick={onReset}
+            title={`Modifié sur cet écran. Valeur de la source : ${formatSourceValue(sourceValue)}`}
+            aria-label={`Rétablir la valeur de la source pour ${field.label}`}
+          >
+            modifié ↺
+          </button>
+        )}
+      </div>
       {field.kind === 'select' ? (
         <select {...inputProps}>
           {field.options?.map((option) => (
@@ -62,6 +79,12 @@ export function ConfigField({ field, value, onChange }: ConfigFieldProps) {
       )}
     </div>
   )
+}
+
+function formatSourceValue(value: string | number): string {
+  const text = String(value)
+  if (text === '') return '(vide)'
+  return text.length > 60 ? `${text.slice(0, 60)}…` : text
 }
 
 const INPUT_ATTRIBUTES = {

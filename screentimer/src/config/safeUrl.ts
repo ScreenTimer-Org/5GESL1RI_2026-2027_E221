@@ -15,13 +15,3 @@ export function isSafeUrl(value: string): boolean {
     return false
   }
 }
-
-/** Resolves `path` only if it points to the page's own origin. */
-export function resolveSameOrigin(path: string): string | null {
-  try {
-    const url = new URL(path, baseHref())
-    return url.origin === new URL(baseHref()).origin ? url.href : null
-  } catch {
-    return null
-  }
-}

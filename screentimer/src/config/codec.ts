@@ -7,7 +7,7 @@ export interface ValidationResult {
   invalid: ConfigKey[]
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
@@ -42,29 +42,14 @@ export function validateField<K extends ConfigKey>(key: K, raw: unknown): FieldR
     : { ok: false, error: parsed.issues[0]?.message ?? 'Valeur invalide' }
 }
 
-export function sanitizeConfig(input: unknown): ConfigPatch {
-  return validateConfig(input).config
-}
-
 export function configFromSearch(params: URLSearchParams): ValidationResult {
   return validateConfig(Object.fromEntries(params))
 }
 
-/**
- * Writes only the values that differ from `base`, so URLs stay short.
- * Query parameters that are not config keys are kept as they are.
- */
-export function configToSearch(
-  config: AppConfig,
-  base: AppConfig,
-  current: URLSearchParams,
-): URLSearchParams {
-  const params = new URLSearchParams()
-  for (const [key, value] of current) {
-    if (!(CONFIG_KEYS as string[]).includes(key)) params.append(key, value)
-  }
+/** Writes every key of `patch`, keeping the other query parameters. */
+export function writeConfigToSearch(patch: ConfigPatch, params: URLSearchParams): void {
   for (const key of CONFIG_KEYS) {
-    if (config[key] !== base[key]) params.set(key, String(config[key]))
+    if (patch[key] === undefined) params.delete(key)
+    else params.set(key, String(patch[key]))
   }
-  return params
 }

@@ -90,3 +90,139 @@
   font-size: 0.8rem;
   color: var(--danger);
 }
+
+.message[data-error] {
+  color: var(--danger);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.section h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.hint code {
+  font-size: 0.8rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.checkbox input {
+  width: auto;
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline input {
+  flex: 1 1 12rem;
+  width: auto;
+}
+
+.form > .inline {
+  grid-column: 1 / -1;
+}
+
+.fileName {
+  flex: 1 1 auto;
+  overflow: hidden;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fieldHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.reset {
+  padding: 0 0.4rem;
+  font-size: 0.75rem;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.faqItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.faqItem[data-hidden] .faqText {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.faqItem button {
+  flex: none;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.faqText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.faqText span {
+  color: var(--muted);
+}
+
+.badge {
+  margin-left: 0.4rem;
+  padding: 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+}

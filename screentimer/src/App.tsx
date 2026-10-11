@@ -1,25 +1,26 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useConfig } from './config/useConfig'
 import { ConfigPanel } from './features/config-panel/ConfigPanel'
 import panelStyles from './features/config-panel/ConfigPanel.module.css'
 import { Screen } from './features/screen/Screen'
+import { useScreenData } from './sources/useScreenData'
 
 export default function App() {
-  const { config, update, replace, reset } = useConfig()
+  const data = useScreenData()
+  const { ready, config } = data
   const [panelOpen, setPanelOpen] = useState(false)
   const closePanel = useCallback(() => setPanelOpen(false), [])
 
   useEffect(() => {
-    if (config) document.title = [config.course, config.room].filter(Boolean).join(' · ') || 'Screentimer'
-  }, [config])
+    if (ready) document.title = [config.course, config.room].filter(Boolean).join(' · ') || 'Screentimer'
+  }, [ready, config.course, config.room])
 
-  if (!config) return null
+  if (!ready) return null
 
   return (
     <>
-      <Screen config={config} />
+      <Screen config={config} faq={data.faq} faqStatus={data.faqSource} />
       {panelOpen ? (
-        <ConfigPanel config={config} onChange={update} onReplace={replace} onReset={reset} onClose={closePanel} />
+        <ConfigPanel data={data} onClose={closePanel} />
       ) : (
         <button
           type="button"

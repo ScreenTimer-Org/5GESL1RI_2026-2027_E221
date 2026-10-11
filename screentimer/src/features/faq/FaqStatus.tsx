@@ -1,19 +1,20 @@
+import type { SourceError, SourceState } from '../../sources/useSource'
 import { formatClock } from '../../utils/time'
 import styles from './FaqList.module.css'
-import type { FaqError, FaqState } from './useEtherpadFaq'
 
-const ERROR_MESSAGES: Record<FaqError, string> = {
-  network: 'Mise à jour de la FAQ impossible',
-  format: 'FAQ en cours de modification (JSON invalide)',
+const ERROR_MESSAGES: Record<SourceError, string> = {
+  network: 'Mise à jour de la source impossible',
+  format: 'Source en cours de modification (JSON invalide)',
+  missing: 'Fichier importé absent de cet appareil',
 }
 
-export function FaqStatus({ faq }: { faq: FaqState }) {
-  if (faq.error) {
+export function FaqStatus({ status }: { status: SourceState }) {
+  if (status.error) {
     return (
       <p className={styles.status} data-error>
-        {ERROR_MESSAGES[faq.error]}
+        {ERROR_MESSAGES[status.error]}
       </p>
     )
   }
-  return faq.updatedAt && <p className={styles.status}>Mise à jour à {formatClock(faq.updatedAt)}</p>
+  return status.updatedAt && <p className={styles.status}>Mise à jour à {formatClock(status.updatedAt)}</p>
 }

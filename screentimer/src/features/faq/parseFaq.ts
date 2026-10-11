@@ -1,7 +1,6 @@
 import * as v from 'valibot'
 
-const MAX_TEXT_LENGTH = 200_000
-const MAX_ENTRIES = 200
+export const MAX_FAQ_ENTRIES = 200
 const MAX_FIELD_LENGTH = 2_000
 
 /**
@@ -9,7 +8,7 @@ const MAX_FIELD_LENGTH = 2_000
  * which could visually reorder or hide text on screen.
  */
 // eslint-disable-next-line no-control-regex -- matching control characters is the point
-const UNSAFE_CHARS = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F\u200E\u200F\u202A-\u202E\u2066-\u2069]/g
+const UNSAFE_CHARS = /[\u0000-\u0008\u000B-\u001F\u007F-\u009F‎‏‪-‮⁦-⁩]/g
 
 function clean(text: string): string {
   const trimmed = text.replace(UNSAFE_CHARS, '').trim()
@@ -18,26 +17,25 @@ function clean(text: string): string {
 
 const text = v.pipe(v.string(), v.transform(clean))
 
-/** The only accepted format: `[{ "question": "…", "answer": "…" }]`. */
-const faqSchema = v.pipe(
-  v.array(v.strictObject({ question: v.pipe(text, v.nonEmpty()), answer: text })),
-  v.maxLength(MAX_ENTRIES),
-)
+const faqEntrySchema = v.strictObject({ question: v.pipe(text, v.nonEmpty()), answer: text })
 
-export type FaqEntry = v.InferOutput<typeof faqSchema>[number]
+/** The only accepted format: `[{ "question": "…", "answer": "…" }]`. */
+const faqSchema = v.pipe(v.array(faqEntrySchema), v.maxLength(MAX_FAQ_ENTRIES))
+
+export type FaqEntry = v.InferOutput<typeof faqEntrySchema>
 
 /**
- * Returns null when the pad is not a valid FAQ (e.g. a teacher is mid-edit),
- * so the caller can keep the last valid one. The result is plain text and
- * must be rendered as text only.
+ * Returns null when `data` is not a valid FAQ list (e.g. a teacher is
+ * mid-edit), so the caller can keep the last valid one. The result is plain
+ * text and must be rendered as text only.
  */
-export function parseFaq(raw: string): FaqEntry[] | null {
-  let data: unknown
-  try {
-    data = JSON.parse(raw.slice(0, MAX_TEXT_LENGTH))
-  } catch {
-    return null
-  }
+export function validateFaq(data: unknown): FaqEntry[] | null {
   const result = v.safeParse(faqSchema, data)
+  return result.success ? result.output : null
+}
+
+/** Validates a question typed in the config panel. */
+export function validateFaqEntry(question: string, answer: string): FaqEntry | null {
+  const result = v.safeParse(faqEntrySchema, { question, answer })
   return result.success ? result.output : null
 }

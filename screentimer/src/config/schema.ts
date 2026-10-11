@@ -13,7 +13,7 @@ export const LIMITS = {
   duration: { min: 1, max: 24 * 60 },
   minStay: { min: 0, max: 24 * 60 },
   warning: { min: 0, max: 24 * 60 },
-  faqRefresh: { min: 60, max: 3600 },
+  refresh: { min: 60, max: 3600 },
   cycle: { min: 3, max: 600 },
 } satisfies Record<string, Bounds>
 
@@ -46,7 +46,7 @@ const timeOfDay = v.pipe(
 
 /**
  * Single source of truth for the screen. Every key is also the name of its
- * URL query parameter and of its property in the JSON config file.
+ * URL query parameter and of its property in the `config` object of a source.
  */
 export const configSchema = v.object({
   mode: v.picklist(MODES, 'Mode inconnu'),
@@ -64,10 +64,8 @@ export const configSchema = v.object({
   warning: integer(LIMITS.warning),
   /** One instruction per line. */
   instructions: text(5000),
-  /** Etherpad pad URL used as the shared FAQ source. */
-  pad: url,
-  /** FAQ polling interval, in seconds. */
-  faqRefresh: integer(LIMITS.faqRefresh),
+  /** Polling interval of the config and FAQ sources, in seconds. */
+  refresh: integer(LIMITS.refresh),
   /** Time each instructions / FAQ page stays on screen, in seconds. */
   cycle: integer(LIMITS.cycle),
 })
@@ -89,8 +87,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   minStay: 30,
   warning: 10,
   instructions: '',
-  pad: '',
-  faqRefresh: 60,
+  refresh: 60,
   cycle: 15,
 }
 
@@ -125,6 +122,5 @@ export const CONFIG_FIELDS: readonly FieldDef[] = [
   { key: 'cycle', label: 'Rotation des pages (s)', kind: 'number', ...LIMITS.cycle },
   { key: 'logo', label: 'Logo (lien)', kind: 'url' },
   { key: 'instructions', label: 'Consignes (une par ligne)', kind: 'textarea' },
-  { key: 'pad', label: 'FAQ Etherpad (lien)', kind: 'url' },
-  { key: 'faqRefresh', label: 'Rafraîchissement FAQ (s)', kind: 'number', ...LIMITS.faqRefresh },
+  { key: 'refresh', label: 'Rafraîchissement des sources (s)', kind: 'number', ...LIMITS.refresh },
 ]
