@@ -71,12 +71,15 @@ Example: `?src=https://hebdo.framapad.org/p/xyz&room=B204&start=14:00`
 | `instructions` | Markdown             | One instruction per line (see Markdown below)      |
 | `refresh`      | seconds (≥ 60)       | Source polling interval (see rate limiting below)  |
 | `cycle`        | seconds (≥ 3)        | Time each instructions / FAQ page stays on screen  |
+| `faqAlert`     | `off` \| `visual` \| `sound` \| `both` | Alert when the FAQ changes (default `visual`) |
 
 The timer depends only on the config, so every class that opens the same URL shows the same countdown.
 
 ## Instructions and FAQ
 
 In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. Each panel is split into as many pages as it takes for its content to fit on screen, and rotates every `cycle` seconds. The instructions are split between lines: a heading always stays with its first instruction, and the numbering carries on from one page to the next. When a panel has several pages, the ⏸ button in its header pauses its rotation on this screen, independently of the other panel. In break mode, only the timer is shown, in large.
+
+Each time the FAQ changes (pad edited, question added or hidden in the panel), the screen can alert the students, depending on `faqAlert`: a small « Mise à jour » badge fades in and out next to the FAQ title within 3 s (`visual`), a short chime plays (`sound`), or both. The first load of the source does not trigger it. Browsers may block the chime until the page has been clicked once, so click the screen after opening it on the projector.
 
 ## Markdown
 

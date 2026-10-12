@@ -10,7 +10,8 @@
     "warning": 10,
     "instructions": "",
     "refresh": 60,
-    "cycle": 15
+    "cycle": 15,
+    "faqAlert": "visual"
   },
   "faq": []
 }

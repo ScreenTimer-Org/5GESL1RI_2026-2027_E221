@@ -1,10 +1,12 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import type { FaqAlert } from '../../config/schema'
 import { useCycle } from '../../hooks/useCycle'
 import { usePages } from '../../hooks/usePages'
 import type { SourceState } from '../../sources/useSource'
 import { FaqList } from '../faq/FaqList'
 import { FaqStatus } from '../faq/FaqStatus'
 import type { FaqEntry } from '../faq/parseFaq'
+import { useFaqAlert } from '../faq/useFaqAlert'
 import { InstructionList } from '../instructions/InstructionList'
 import type { InstructionRow } from '../instructions/toInstructionRows'
 import styles from './InfoPanel.module.css'
@@ -15,10 +17,13 @@ interface InfoPanelProps {
   faq: FaqEntry[]
   faqStatus: SourceState
   cycleSeconds: number
+  faqAlert: FaqAlert
 }
 
 /** Instructions and FAQ side by side, each split into as many pages as needed to fit. */
-export function InfoPanel({ instructions, faq, faqStatus, cycleSeconds }: InfoPanelProps) {
+export function InfoPanel({ instructions, faq, faqStatus, cycleSeconds, faqAlert }: InfoPanelProps) {
+  const faqChanges = useFaqAlert(faq, faqStatus.settled, faqAlert)
+
   return (
     <div className={styles.split}>
       <PagedPanel
@@ -35,6 +40,7 @@ export function InfoPanel({ instructions, faq, faqStatus, cycleSeconds }: InfoPa
         empty="Aucune question pour le moment."
         cycleSeconds={cycleSeconds}
         status={<FaqStatus status={faqStatus} />}
+        alertKey={faqChanges}
       />
     </div>
   )
@@ -48,10 +54,12 @@ interface PagedPanelProps<T> {
   empty: string
   cycleSeconds: number
   status?: ReactNode
+  /** Shows a short « Mise à jour » badge each time it changes; 0 shows nothing. */
+  alertKey?: number
 }
 
 /** Rotates through the pages every `cycleSeconds`, unless paused on this screen. */
-function PagedPanel<T>({ title, items, renderList, empty, cycleSeconds, status }: PagedPanelProps<T>) {
+function PagedPanel<T>({ title, items, renderList, empty, cycleSeconds, status, alertKey = 0 }: PagedPanelProps<T>) {
   const { viewportRef, measureRef, pages: fitted } = usePages(items)
   const [paused, setPaused] = useState(false)
 
@@ -70,6 +78,12 @@ function PagedPanel<T>({ title, items, renderList, empty, cycleSeconds, status }
           {rotating && (
             <span className={styles.counter}>
               {index + 1}/{pages.length}
+            </span>
+          )}
+          {/* Keyed by the change count, so each change restarts the animation. */}
+          {alertKey > 0 && (
+            <span key={alertKey} className={styles.alertBadge} role="status">
+              Mise à jour
             </span>
           )}
         </h2>

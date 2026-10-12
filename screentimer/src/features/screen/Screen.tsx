@@ -31,7 +31,13 @@ export function Screen({ config, faq, faqStatus }: ScreenProps) {
       {/* An exam needs room for the instructions and the FAQ; a break only shows the timer, in large. */}
       <main className={styles.main}>
         {isExam ? (
-          <InfoPanel instructions={instructions} faq={faq} faqStatus={faqStatus} cycleSeconds={config.cycle} />
+          <InfoPanel
+            instructions={instructions}
+            faq={faq}
+            faqStatus={faqStatus}
+            cycleSeconds={config.cycle}
+            faqAlert={config.faqAlert}
+          />
         ) : (
           <TimerPanel config={config} size="large" />
         )}

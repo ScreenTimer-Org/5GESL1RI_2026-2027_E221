@@ -90,6 +90,32 @@
   }
 }
 
+/* FAQ alert: a small, quiet badge that fades in and out within 3 s, so it does not distract. */
+.alertBadge {
+  flex: none;
+  align-self: center;
+  padding: 0.1em 0.5em;
+  font-size: 0.4em;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  opacity: 0;
+  animation: alert-badge 3s ease-in-out forwards;
+}
+
+@keyframes alert-badge {
+  15%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page {
     animation: none;

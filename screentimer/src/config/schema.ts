@@ -5,6 +5,9 @@ import { isSafeUrl } from './safeUrl'
 
 export const MODES = ['exam', 'break'] as const
 
+/** How the screen signals a change of the FAQ. */
+export const FAQ_ALERTS = ['off', 'visual', 'sound', 'both'] as const
+
 interface Bounds {
   min: number
   max: number
@@ -71,12 +74,15 @@ export const configSchema = v.object({
   refresh: integer(LIMITS.refresh),
   /** Time each instructions / FAQ page stays on screen, in seconds. */
   cycle: integer(LIMITS.cycle),
+  /** Alert shown and/or played when the FAQ changes. */
+  faqAlert: v.picklist(FAQ_ALERTS, 'Alerte inconnue'),
 })
 
 export type AppConfig = v.InferOutput<typeof configSchema>
 export type ConfigKey = keyof AppConfig
 export type ConfigPatch = Partial<AppConfig>
 export type Mode = AppConfig['mode']
+export type FaqAlert = AppConfig['faqAlert']
 
 export const CONFIG_KEYS = Object.keys(configSchema.entries) as ConfigKey[]
 
@@ -92,6 +98,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   instructions: '',
   refresh: 60,
   cycle: 15,
+  faqAlert: 'visual',
 }
 
 /** `markdown`: a textarea with the Markdown toolbar. */
@@ -124,6 +131,17 @@ export const CONFIG_FIELDS: readonly FieldDef[] = [
   { key: 'minStay', label: 'Sortie autorisée après (min)', kind: 'number', ...LIMITS.minStay },
   { key: 'warning', label: 'Alerte de fin (min)', kind: 'number', ...LIMITS.warning },
   { key: 'cycle', label: 'Rotation des pages (s)', kind: 'number', ...LIMITS.cycle },
+  {
+    key: 'faqAlert',
+    label: 'Alerte FAQ modifiée',
+    kind: 'select',
+    options: [
+      { value: 'off', label: 'Aucune' },
+      { value: 'visual', label: 'Visuelle' },
+      { value: 'sound', label: 'Sonore' },
+      { value: 'both', label: 'Visuelle et sonore' },
+    ],
+  },
   { key: 'logo', label: 'Logo (lien)', kind: 'url' },
   { key: 'instructions', label: 'Consignes (une par ligne)', kind: 'markdown' },
   { key: 'refresh', label: 'Rafraîchissement des sources (s)', kind: 'number', ...LIMITS.refresh },
