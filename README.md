@@ -40,6 +40,24 @@ dans une VM VMware, avec le bureau GNOME et une session X11.
 - Modification 2 : remplacement de `--alpha` par une capture du bureau (Pillow), floutée et assombrie, affichée dans un `Canvas` avec l'horloge par-dessus. Repli en fond uni si la capture échoue. Test Windows OK.
 - **Pas encore testé sur la VM** : fond flouté, à valider (session X11 ou Wayland ?).
 
+**2026-10-11**
+- Recherche transparence en temps réel (sans capture d'écran) pour répondre à
+  la demande du client de voir le bureau en direct (vidéo, jeu, etc.) derrière
+  l'écran de verrouillage.
+- Tests effectués sur VM Debian : GNOME natif, puis installation et test sous
+  XFCE avec compositeur activé manuellement (xfconf-query).
+- Diagnostic : rendu matériel disponible (glxinfo: direct rendering = Yes),
+  mais transparence reste bloquée même en isolant Tkinter seul, hors script et
+  hors xsecurelock.
+- Cause identifiée avec Zackary : xsecurelock bloque volontairement la
+  composition sur sa fenêtre (protection de sécurité par défaut).
+- Test des variables officielles xsecurelock (XSECURELOCK_NO_COMPOSITE,
+  XSECURELOCK_DIM_OVERRIDE_COMPOSITOR_DETECTION) : toujours opaque, testé en
+  parallèle sur ma VM et sur le Linux natif de Zackary.
+- Installation de picom, VirtualBox Guest Additions : sans effet, écarté.
+- Zackary a ensuite trouvé une piste fonctionnelle de son côté (fond visible
+  en direct avec xsecurelock), à valider avant de merger.
+
 
 **Reste à faire**
 1. Tester le fond flouté sur la VM (`echo $XDG_SESSION_TYPE`, puis `python3 lockscreen/screensaver_overlay.py --timeout 10`).
@@ -69,9 +87,47 @@ dans une VM VMware, avec le bureau GNOME et une session X11.
 
 **IA utilisée** : Claude (Anthropic, Sonnet 5.5), 2026-09-30, pour l'analyse du plan, pour plus d'information sur le fonctionnement des différents outils utilisé et le diagnostic des bugs d'affichage. Conversation conservée.
 
+**2026-10-11**
+- Demande du client : l'écran doit rester visible **en direct** (vidéo, jeu) pendant le verrouillage, et la boîte de mot de passe n'apparaît qu'à l'appui d'une touche.
+- Principe retenu : on garde xsecurelock (capture clavier/souris + PAM) mais on rend sa fenêtre de couverture noire (`background`) **transparente avec l'extension X11 XShape**. Le vrai bureau est visible, pas une capture.
+  - Au repos : forme vide, donc fenêtre invisible (elle garde ses captures d'entrée, rien n'atteint les applications).
+  - Touche pressée : xsecurelock affiche sa fenêtre `auth`. On découpe dans `background` uniquement le rectangle de cette boîte ; le reste du bureau continue d'être animé.
+- Pourquoi l'ancienne approche (Tk + `-alpha` dans le saver) ne pouvait pas marcher : le saver est dessiné dans une fenêtre enfant de `background`, qui est noire et opaque. Le shape agit sur `background` elle-même.
+- Sécurité "fail closed" : si le script plante, `background` redevient entièrement noire (écran noir, jamais déverrouillé). Le mot de passe reste vérifié par xsecurelock/PAM, rien n'est lu ni stocké par nos scripts.
+
+**Changements dans les fichiers**
+- `screensaver_overlay.py` **supprimé**, remplacé par `transparent_saver.py` (python3-xlib). Il remonte de `XSCREENSAVER_WINDOW` jusqu'à la fenêtre `background`, applique la forme vide, puis surveille l'apparition de `auth` / `auth_x11_screen` pour ne laisser visible que leur rectangle.
+- `saver.sh` : simplifié, lance seulement `transparent_saver.py`.
+- `lock.sh` : réécrit en fonctions.
+  - Plus de capture d'écran (`scrot`, `LOCKSCREEN_FOND`, dossier `/tmp` et `trap`) : devenu inutile.
+  - Détecte un compositeur actif (propriétaire de `_NET_WM_CM_S0`) : avec compositeur `XSECURELOCK_NO_COMPOSITE=0`, sans compositeur `=1` (sinon la fenêtre overlay de xsecurelock reste noire et opaque).
+  - `XSECURELOCK_COMPOSITE_OBSCURER=0` (la fenêtre blanche de sécurité serait visible à travers la couverture transparente) et `XSECURELOCK_BLANK_TIMEOUT=-1` (pas d'extinction DPMS).
+  - Filtre les messages de diagnostic inoffensifs de xsecurelock (« Someone overlapped… », « MaybeRaiseWindow miss… », « auth child failed »…). Les vraies erreurs restent affichées.
+  - Minimise le terminal au lancement (`xdotool`) et le réaffiche au déverrouillage.
+  - `--timeout N` conservé (test uniquement).
+- `install.sh` : dépendances = `python3 python3-xlib xsecurelock xdotool coreutils`. Retirés : `python3-tk`, `python3-pil`, `python3-pil.imagetk`, `scrot`, `x11-utils`. Fins de ligne passées de CRLF à LF.
+- `README.md` du dossier `lockscreen/` ajouté.
+
+**Tests (Kali, Debian et Mint)**
+- Touche : seule la boîte de mot de passe apparaît, le reste continue de bouger. Échap : retour au tout transparent.
+- Mauvais mot de passe refusé, bon mot de passe accepté (utilisateur de test, vrai PAM).
+- Sortie console vide pendant un cycle complet.
+
+**Limites connues**
+- On peut regarder le bureau mais pas cliquer dessus (entrées capturées).
+- Un mouvement de souris ou un clic affiche aussi la boîte de mot de passe, pas seulement une touche : comportement interne de xsecurelock, non configurable.
+- Ctrl+Alt+F1 ouvre toujours une console texte. Wayland non supporté.
+
+**Impact sur le reste du groupe**
+- Fond flouté, horloge, date en français, `--blur`, `--dim`, `--fond`, `--message`, `--logo` : n'existent plus. La locale `fr_FR.UTF-8` n'est plus nécessaire dans `install.sh`.
+- L'interface « la capture est prise par `lock.sh` et passée via `LOCKSCREEN_FOND` » n'est plus d'actualité.
+
+**IA utilisée** : Claude (Anthropic, Sonnet 5.5), 2026-10-11, pour la modification du projet (saver transparent XShape), le nettoyage du code et l'explication du fonctionnement. Conversation conservée.
+
 ### Betul
 - ...
 
 ### Souleymane
 
 - ...
+

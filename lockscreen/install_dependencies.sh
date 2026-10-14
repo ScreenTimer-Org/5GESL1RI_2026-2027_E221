@@ -27,7 +27,7 @@ for commande in apt sudo; do
 done
 
 # Vérifier que les fichiers du projet sont présents.
-for fichier in lock.sh saver.sh screensaver_overlay.py; do
+for fichier in lock.sh saver.sh transparent_saver.py; do
     if [ ! -f "$fichier" ]; then
         echo "Erreur : le fichier $fichier est manquant."
         exit 1
@@ -40,30 +40,27 @@ sudo apt update
 # Installer les dépendances.
 sudo apt install -y \
     python3 \
-    python3-tk \
-    python3-pil \
-    python3-pil.imagetk \
+    python3-xlib \
     xsecurelock \
-    scrot \
-    x11-utils \
+    xdotool \
     coreutils
 
 # Vérifier que les commandes du projet sont disponibles.
-for commande in python3 xsecurelock scrot xwininfo timeout mktemp; do
+for commande in python3 xsecurelock xdotool timeout; do
     if ! command -v "$commande" >/dev/null 2>&1; then
         echo "Erreur : la commande $commande est manquante."
         exit 1
     fi
 done
 
-# Vérifier les bibliothèques Python nécessaires à l'affichage.
-if ! python3 -c "import tkinter; from PIL import Image, ImageEnhance, ImageFilter, ImageGrab, ImageTk"; then
-    echo "Erreur : une bibliothèque Python est manquante."
+# Vérifier la bibliothèque Python nécessaire (X11 + extension SHAPE).
+if ! python3 -c "import Xlib; from Xlib.ext import shape"; then
+    echo "Erreur : la bibliothèque Python Xlib est manquante."
     exit 1
 fi
 
 # Rendre les scripts de lancement exécutables.
-chmod +x lock.sh saver.sh
+chmod +x lock.sh saver.sh transparent_saver.py
 
 echo "Installation terminée."
 echo "Tu peux maintenant lancer ./lock.sh depuis ce dossier."
