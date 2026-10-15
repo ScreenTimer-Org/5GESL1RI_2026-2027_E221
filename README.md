@@ -58,13 +58,18 @@ dans une VM VMware, avec le bureau GNOME et une session X11.
 - Zackary a ensuite trouvé une piste fonctionnelle de son côté (fond visible
   en direct avec xsecurelock), à valider avant de merger.
 
+**2026-10-15**
+- Ajout d'un playbook Ansible (lockscreen/ansible/) pour l'installation des
+  dépendances.
+- Test : ansible-playbook -i inventory.ini playbook.yml --ask-become-pass
+  → OK (failed=0), paquets installés, scripts rendus exécutables.
+- Test fonctionnel après installation : ./lock.sh → transparence + mot de
+  passe OK.
+- Note : les vérifications X11/DISPLAY du playbook sont "skipped" car sudo
+  ne transmet pas ces variables d'environnement (contexte root différent de
+  la session utilisateur). Non bloquant, à corriger si besoin.
 
-**Reste à faire**
-1. Tester le fond flouté sur la VM (`echo $XDG_SESSION_TYPE`, puis `python3 lockscreen/screensaver_overlay.py --timeout 10`).
-2. Date en français (noms de jours et de mois écrits en dur dans le script).
-3. Vrai verrouillage avec mot de passe via xsecurelock (X11 obligatoire).
-4. Scripts `lock.sh`, `saver.sh`, `install.sh`.
-5. README du dossier `lockscreen/`, tests, pipeline GitLab.
+
 
 **IA utilisée** : Claude (Anthropic, Sonnet 5.5), 2026-09-30, pour l'analyse du script, le plan technique et les commandes Git. Conversation conservée.
 
