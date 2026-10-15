@@ -68,7 +68,19 @@ dans une VM VMware, avec le bureau GNOME et une session X11.
 - Note : les vérifications X11/DISPLAY du playbook sont "skipped" car sudo
   ne transmet pas ces variables d'environnement (contexte root différent de
   la session utilisateur). Non bloquant, à corriger si besoin.
-
+- `firejail --net=none python3 transparent_saver.py` : aucun impact, le
+  script s'exécute normalement (accès fichier et X11 fonctionnels).
+  Confirme que l'absence de réseau n'affecte rien, cohérent avec une
+  authentification PAM locale.
+- `firejail --private --net=none ...` : échec, fichier introuvable
+  (`$HOME` isolé masque le dossier projet).
+- `firejail --private --net=none --whitelist=~/.Xauthority --whitelist="$(pwd)" ...` :
+  échec identique, même `ls "$(pwd)"` ne voit pas le dossier depuis le
+  sandbox. La whitelist n'a pas restauré l'accès dans ce contexte.
+- Conclusion : `--private` isole le système de fichiers utilisateur de façon
+  très stricte (comportement de sécurité attendu), incompatible tel quel
+  avec un script qui doit accéder à son propre dossier projet sans
+  configuration supplémentaire plus poussée.
 
 
 **IA utilisée** : Claude (Anthropic, Sonnet 5.5), 2026-09-30, pour l'analyse du script, le plan technique et les commandes Git. Conversation conservée.
