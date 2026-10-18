@@ -1,0 +1,30 @@
+.heading {
+  margin: 0.6em 0 0.25em;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.heading:first-child {
+  margin-top: 0;
+}
+
+.heading[data-level='1'] {
+  font-size: 1.25em;
+}
+
+.heading[data-level='2'] {
+  font-size: 1.1em;
+}
+
+.heading[data-level='3'] {
+  font-size: 1em;
+}
+
+.paragraph {
+  margin: 0;
+}
+
+.paragraph + .paragraph {
+  margin-top: 0.5em;
+}

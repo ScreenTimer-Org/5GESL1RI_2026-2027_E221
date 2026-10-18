@@ -1,4 +1,4 @@
-# 5GESL1RI_2026-2027_E221_TimeBoardShare_BreakTimer
+# 5GESL1RI_2026-2027_E221
 
 
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://gitlab.com/jdosec/5gesl1ri_2026-2027_e221_timeboardshare_breaktimer.git
+git remote add origin https://gitlab.com/jdosec/5gesl1ri_2026-2027_e221.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-* [Set up project integrations](https://gitlab.com/jdosec/5gesl1ri_2026-2027_e221_timeboardshare_breaktimer/-/settings/integrations)
+* [Set up project integrations](https://gitlab.com/jdosec/5gesl1ri_2026-2027_e221/-/settings/integrations)
 
 ## Collaborate with your team
 
