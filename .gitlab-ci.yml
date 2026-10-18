@@ -7,9 +7,9 @@ create-pages:
     # The folder that contains the files to be exposed at the Page URL
     publish: screentimer/dist
   rules:
-    # This ensures that only pushes to the react-prototype branch will trigger
+    # This ensures that only pushes to the main branch will trigger
     # a pages deploy
-    - if: $CI_COMMIT_REF_NAME == "react-prototype"
+    - if: $CI_COMMIT_REF_NAME == "main"
   before_script:
     - cd screentimer
     # Install dependencies based on lock files
