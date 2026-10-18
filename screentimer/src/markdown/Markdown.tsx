@@ -40,15 +40,34 @@ export function MarkdownHeading({ level, children, firstHeading }: {
   )
 }
 
-/** Headings and paragraphs, e.g. a FAQ answer. Line breaks are kept. */
+/** Headings, paragraphs and lists, e.g. a FAQ answer. Line breaks are kept. */
 export function MarkdownBlocks({ text, firstHeading }: { text: string; firstHeading: 3 | 4 }) {
   const blocks = useMemo(() => parseBlocks(text), [text])
-  return blocks.map((block, index) =>
-    block.type === 'heading' ? (
-      <MarkdownHeading key={index} level={block.level} firstHeading={firstHeading}>
-        {block.children}
-      </MarkdownHeading>
-    ) : (
+  return blocks.map((block, index) => {
+    if (block.type === 'heading') {
+      return (
+        <MarkdownHeading key={index} level={block.level} firstHeading={firstHeading}>
+          {block.children}
+        </MarkdownHeading>
+      )
+    }
+    if (block.type === 'list') {
+      const items = block.items.map((item, i) => (
+        <li key={i}>
+          <Inline nodes={item} />
+        </li>
+      ))
+      return block.ordered ? (
+        <ol key={index} className={styles.list} start={block.start}>
+          {items}
+        </ol>
+      ) : (
+        <ul key={index} className={styles.list}>
+          {items}
+        </ul>
+      )
+    }
+    return (
       <p key={index} className={styles.paragraph}>
         {block.lines.map((line, i) => (
           <Fragment key={i}>
@@ -57,6 +76,6 @@ export function MarkdownBlocks({ text, firstHeading }: { text: string; firstHead
           </Fragment>
         ))}
       </p>
-    ),
-  )
+    )
+  })
 }

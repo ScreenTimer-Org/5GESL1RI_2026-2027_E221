@@ -1,7 +1,7 @@
 /**
  * Minimal Markdown subset for text from untrusted sources (pads, links):
- * `# headings` (levels 1 to 3), `**bold**`, `*italic*`, `***both***` and
- * `\` escapes. Anything else stays plain text. The result is a tree of
+ * `# headings` (levels 1 to 3), `- lists` and `1. numbered lists`,
+ * `**bold**`, `*italic*`, `***both***` and `\` escapes. Anything else stays plain text. The result is a tree of
  * plain strings, never HTML, so it can only ever be rendered as text.
  */
 
@@ -16,10 +16,16 @@ export type BlockNode =
   | { type: 'heading'; level: HeadingLevel; children: InlineNode[] }
   /** Consecutive non-empty lines; an empty line starts a new paragraph. */
   | { type: 'paragraph'; lines: InlineNode[][] }
+  /** One item per `- `, `* `, `+ ` line, or per `1. ` / `1) ` line, numbered on from the first one. */
+  | { type: 'list'; ordered: boolean; start: number; items: InlineNode[][] }
+
+type ListBlock = Extract<BlockNode, { type: 'list' }>
 
 /** `####` and deeper are rendered as level 3, so a typo does not hide the line. */
 const HEADING = /^(#{1,6})[ \t]+(.*)$/
-const ESCAPABLE = new Set(['\\', '*', '#'])
+const BULLET = /^[-*+][ \t]+(.*)$/
+const NUMBERED = /^(\d{1,9})[.)][ \t]+(.*)$/
+const ESCAPABLE = new Set(['\\', '*', '#', '-', '+', '.', ')'])
 const STAR = '*'
 
 function starRun(src: string, at: number): number {
@@ -99,24 +105,55 @@ export function parseInline(src: string): InlineNode[] {
   return nodes
 }
 
+function listItem(line: string): { ordered: boolean; number: number; text: string } | null {
+  const bullet = BULLET.exec(line)
+  if (bullet) return { ordered: false, number: 1, text: bullet[1] }
+  const numbered = NUMBERED.exec(line)
+  if (numbered) return { ordered: true, number: Number(numbered[1]), text: numbered[2] }
+  return null
+}
+
+/**
+ * Lines are trimmed, so lists cannot be nested. A blank line between two
+ * items keeps them in the same list; any other line ends it.
+ */
 export function parseBlocks(src: string): BlockNode[] {
   const blocks: BlockNode[] = []
   let paragraph: InlineNode[][] | null = null
+  let list: ListBlock | null = null
 
   for (const raw of src.split('\n')) {
     const line = raw.trim()
+    if (!line) {
+      paragraph = null
+      continue
+    }
+
     const heading = HEADING.exec(line)
-    if (!line || heading) paragraph = null
     if (heading) {
+      paragraph = list = null
       const level = Math.min(heading[1].length, 3) as HeadingLevel
       blocks.push({ type: 'heading', level, children: parseInline(heading[2].trim()) })
-    } else if (line) {
-      if (!paragraph) {
-        paragraph = []
-        blocks.push({ type: 'paragraph', lines: paragraph })
-      }
-      paragraph.push(parseInline(line))
+      continue
     }
+
+    const item = listItem(line)
+    if (item) {
+      paragraph = null
+      if (!list || list.ordered !== item.ordered) {
+        list = { type: 'list', ordered: item.ordered, start: item.number, items: [] }
+        blocks.push(list)
+      }
+      list.items.push(parseInline(item.text.trim()))
+      continue
+    }
+
+    list = null
+    if (!paragraph) {
+      paragraph = []
+      blocks.push({ type: 'paragraph', lines: paragraph })
+    }
+    paragraph.push(parseInline(line))
   }
   return blocks
 }

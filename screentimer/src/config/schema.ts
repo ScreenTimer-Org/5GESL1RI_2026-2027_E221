@@ -68,7 +68,7 @@ export const configSchema = v.object({
   minStay: integer(LIMITS.minStay),
   /** Minutes before the end when the timer switches to its warning state. */
   warning: integer(LIMITS.warning),
-  /** One instruction per line, in Markdown; a `# heading` line starts a new group. */
+  /** Markdown: headings, paragraphs and lists (see README). */
   instructions: text(5000),
   /** Polling interval of the config and FAQ sources, in seconds. */
   refresh: integer(LIMITS.refresh),
@@ -143,6 +143,6 @@ export const CONFIG_FIELDS: readonly FieldDef[] = [
     ],
   },
   { key: 'logo', label: 'Logo (lien)', kind: 'url' },
-  { key: 'instructions', label: 'Consignes (une par ligne)', kind: 'markdown' },
+  { key: 'instructions', label: 'Consignes (Markdown)', kind: 'markdown' },
   { key: 'refresh', label: 'Rafraîchissement des sources (s)', kind: 'number', ...LIMITS.refresh },
 ]

@@ -1,37 +1,54 @@
 import { parseBlocks, type HeadingLevel, type InlineNode } from '../../markdown/parseMarkdown'
 
-/** One instruction, the unit the instructions panel is split into pages by. */
+/** One line of a paragraph, or one list item. */
+export type InstructionContent =
+  | {
+      type: 'line'
+      children: InlineNode[]
+      /** First line of its paragraph: the others follow it without spacing. */
+      first: boolean
+    }
+  | {
+      type: 'item'
+      children: InlineNode[]
+      ordered: boolean
+      /** Number of the item in its list: it carries on across pages. */
+      number: number
+    }
+
+/** The unit the instructions panel is split into pages by. */
 export interface InstructionRow {
   /**
-   * Set on the first row of a group. A heading is kept with its first
-   * instruction, so a page never ends on a heading.
+   * Set on the first row after a heading. A heading is kept with the line
+   * or item that follows it, so a page never ends on a heading.
    */
   heading: { level: HeadingLevel; children: InlineNode[] } | null
-  /** Null for a heading followed by no instruction. */
-  item: InlineNode[] | null
-  /** Number of the instruction within its group, from 1: it carries on across pages. */
-  number: number
+  /** Null for a heading followed by nothing else. */
+  content: InstructionContent | null
 }
 
-/** One instruction per non-empty line. A `# heading` line starts a new group, numbered from 1 again. */
+/** The Markdown of the instructions, as rows of one paragraph line or list item each. */
 export function toInstructionRows(text: string): InstructionRow[] {
   const rows: InstructionRow[] = []
   let heading: InstructionRow['heading'] = null
-  let number = 0
+
+  const push = (content: InstructionContent) => {
+    rows.push({ heading, content })
+    heading = null
+  }
 
   for (const block of parseBlocks(text)) {
     if (block.type === 'heading') {
-      if (heading) rows.push({ heading, item: null, number: 0 })
+      if (heading) rows.push({ heading, content: null })
       heading = block
-      number = 0
-      continue
-    }
-    for (const line of block.lines) {
-      number += 1
-      rows.push({ heading, item: line, number })
-      heading = null
+    } else if (block.type === 'paragraph') {
+      block.lines.forEach((children, i) => push({ type: 'line', children, first: i === 0 }))
+    } else {
+      block.items.forEach((children, i) =>
+        push({ type: 'item', children, ordered: block.ordered, number: block.start + i }),
+      )
     }
   }
-  if (heading) rows.push({ heading, item: null, number: 0 })
+  if (heading) rows.push({ heading, content: null })
   return rows
 }

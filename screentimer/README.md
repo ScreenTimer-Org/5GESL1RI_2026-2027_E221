@@ -68,7 +68,7 @@ Example: `?src=https://hebdo.framapad.org/p/xyz&room=B204&start=14:00`
 | `minStay`      | minutes              | Delay after the start before students may leave    |
 | `warning`      | minutes              | Remaining time at which the timer turns orange     |
 | `logo`         | http(s) link         | School logo (or a path relative to the page)       |
-| `instructions` | Markdown             | One instruction per line (see Markdown below)      |
+| `instructions` | Markdown             | Exam instructions (see Markdown below)             |
 | `refresh`      | seconds (≥ 60)       | Source polling interval (see rate limiting below)  |
 | `cycle`        | seconds (≥ 3)        | Time each instructions / FAQ page stays on screen  |
 | `faqAlert`     | `off` \| `visual` \| `sound` \| `both` | Alert when the FAQ changes (default `visual`) |
@@ -77,23 +77,43 @@ The timer depends only on the config, so every class that opens the same URL sho
 
 ## Instructions and FAQ
 
-In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. Each panel is split into as many pages as it takes for its content to fit on screen, and rotates every `cycle` seconds. The instructions are split between lines: a heading always stays with its first instruction, and the numbering carries on from one page to the next. When a panel has several pages, the ⏸ button in its header pauses its rotation on this screen, independently of the other panel. In break mode, only the timer is shown, in large.
+In exam mode, the timer sits in the top bar, between the logo and the clock, and the rest of the screen shows the instructions and the FAQ side by side. Each panel is split into as many pages as it takes for its content to fit on screen, and rotates every `cycle` seconds. The instructions are split between paragraph lines and list items: a heading always stays with what follows it, and a numbered list keeps its numbering from one page to the next. When a panel has several pages, the ⏸ button in its header pauses its rotation on this screen, independently of the other panel. In break mode, only the timer is shown, in large.
 
 Each time the FAQ changes (pad edited, question added or hidden in the panel), the screen can alert the students, depending on `faqAlert`: a small « Mise à jour » badge fades in and out next to the FAQ title within 3 s (`visual`), a short chime plays (`sound`), or both. The first load of the source does not trigger it. Browsers may block the chime until the page has been clicked once, so click the screen after opening it on the projector.
 
 ## Markdown
 
-The instructions and the FAQ accept a small Markdown subset, parsed by `src/markdown/parseMarkdown.ts`:
+The instructions and the FAQ are written in Markdown, wherever they are edited: in the settings panel (the **Consignes** field and the FAQ editor), in the pad, or in the `instructions` and `answer` strings of a JSON source (`\n` for a new line). The text is rendered as Markdown as is: nothing is added implicitly, so a line is a plain line and a list only appears when it is written as one.
 
-| Syntax                     | Result                          | Where                                      |
-| -------------------------- | ------------------------------- | ------------------------------------------ |
-| `# Title`, `## …`, `### …` | Heading (deeper levels as `###`) | Instructions, FAQ answers                  |
-| `**bold**`                 | **bold**                        | Everywhere                                 |
-| `*italic*`                 | *italic*                        | Everywhere                                 |
-| `***both***`               | ***both***                      | Everywhere                                 |
-| `\*`, `\#`, `\\`          | The character itself            | Everywhere                                 |
+A small subset is supported, parsed by `src/markdown/parseMarkdown.ts`:
 
-Anything else (links, lists, HTML…) stays plain text, and so does italic nested inside bold nested inside italic (`*a **b *c* b** a*`). In the instructions, every other line is a numbered instruction, and a heading starts a new group numbered from 1. The **T**, **G** and *I* buttons of the settings panel insert this syntax around the selection.
+| Syntax                         | Result                           | Where                     |
+| ------------------------------ | -------------------------------- | ------------------------- |
+| `# Title`, `## …`, `### …`     | Heading (deeper levels as `###`) | Instructions, FAQ answers |
+| `- item`, `* item`, `+ item`   | Bulleted list                    | Instructions, FAQ answers |
+| `1. item`, `1) item`           | Numbered list                    | Instructions, FAQ answers |
+| `**bold**`                     | **bold**                         | Everywhere                |
+| `*italic*`                     | *italic*                         | Everywhere                |
+| `***both***`                   | ***both***                       | Everywhere                |
+| `\*`, `\#`, `\-`, `\+`, `\.`, `\)`, `\\` | The character itself | Everywhere                |
+
+- Consecutive lines form a paragraph and keep their line breaks; an empty line starts a new paragraph.
+- A numbered list starts at its first number (`3.` starts at 3) and counts on from there, whatever the next numbers are. A blank line between two items keeps them in the same list; any other line ends it. Lists cannot be nested: indentation is ignored.
+- To start a line with a list marker without making a list, escape it: `\- text`, `1\. text`.
+- Anything else (links, code, quotes, HTML…) stays plain text, and so does italic nested inside bold nested inside italic (`*a **b *c* b** a*`).
+
+The **T**, **G** and *I* buttons of the settings panel insert the heading, bold and italic syntax around the selection.
+
+Example of instructions:
+
+```markdown
+# Matériel
+Calculatrice **interdite**, téléphones éteints.
+
+# Déroulement
+1. Écrivez votre nom sur chaque copie.
+2. Ne sortez pas avant *30 minutes*.
+```
 
 ## FAQ format
 
@@ -130,6 +150,9 @@ The app never overlaps requests, gives up on a request after 15 s, doubles the i
 - Sources may live on any origin. This gives a shared link no more power than its own query parameters already have: a source can only set config values and FAQ text, which go through the same validation.
 - Sources are fetched without cookies or referrer. Text from the config and the sources is rendered as text, never as HTML: Markdown is parsed into a tree of plain strings, rendered as React elements. The built page also ships a Content-Security-Policy.
 
-## Gitlab/Github page
+## GitLab / GitHub Pages
 
-The .gitlab-ci.yml file has a job to build the bundled page using vite and push it as a Gitlab page. The github workflow does the same and is ran when Gitlab pushes the repo to the mirror Github repo
+The page is built and published by CI/CD, and **only the `main` branch triggers it**, on both repositories. Pushes to any other branch build nothing.
+
+- **GitLab**: the `create-pages` job of `.gitlab-ci.yml` (at the root of the repo) runs on pushes to `main` (`rules: if: $CI_COMMIT_REF_NAME == "main"`). It installs the dependencies with Bun, builds the page with `bunx vite build` in `screentimer/` and publishes `screentimer/dist` as the GitLab Page.
+- **GitHub**: the `.github/workflows/deploy.yml` workflow runs on pushes to `main` (`on: push: branches: [main]`). It does the same build and deploys `screentimer/dist` to GitHub Pages. The GitHub repository is a mirror that GitLab pushes to, so a push to `main` on GitLab updates both pages.

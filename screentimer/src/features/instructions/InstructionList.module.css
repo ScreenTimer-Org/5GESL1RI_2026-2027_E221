@@ -1,12 +1,18 @@
 .rows {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
 }
 
-/* Space before a new group, as padding so that the pagination measures it. */
-.row[data-heading='true']:not(:first-child) {
-  padding-top: 0.4rem;
+.row[data-spacing='block']:not(:first-child) {
+  padding-top: 0.6rem;
+}
+
+.row[data-spacing='heading']:not(:first-child) {
+  padding-top: 1rem;
+}
+
+.line {
+  margin: 0;
 }
 
 .list {
