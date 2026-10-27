@@ -10,12 +10,16 @@
   border-radius: var(--radius);
 }
 
-.panel[data-status='warning'] {
-  --timer-color: var(--warning);
+..panel[data-status='orange'] {
+  --timer-color: orange;
+}
+
+.panel[data-status='red'] {
+  --timer-color: red;
 }
 
 .panel[data-status='finished'] {
-  --timer-color: var(--danger);
+  --timer-color: darkred;
 }
 
 .panel[data-status='idle'],

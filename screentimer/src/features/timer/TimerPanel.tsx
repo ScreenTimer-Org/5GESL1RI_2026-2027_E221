@@ -51,7 +51,9 @@ function statusLabel({ status, startsAt }: TimerState): string | null {
       return 'En attente'
     case 'scheduled':
       return startsAt && `Début à ${formatClock(startsAt)}`
-    case 'warning':
+    case 'orange':
+      return 'Moins de 30 minutes'
+    case 'red':
       return 'Dernières minutes'
     case 'finished':
       return 'Temps écoulé'

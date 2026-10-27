@@ -1,15 +1,25 @@
 import type { AppConfig } from '../../config/schema'
 import { MINUTE_MS, parseTimeOfDay } from '../../utils/time'
 
-export type TimerStatus = 'idle' | 'scheduled' | 'running' | 'warning' | 'finished'
-
+export type TimerStatus =
+    | 'idle'
+    | 'scheduled'
+    | 'running'
+    | 'warning30'
+    | 'warning5'
+    | 'finished'
 export interface TimerState {
   status: TimerStatus
   remainingMs: number
   startsAt: Date | null
   endsAt: Date | null
   leaveAt: Date | null
+  alerts: {
+    orange: number
+    red: number
+  }
 }
+
 
 type TimerConfig = Pick<AppConfig, 'start' | 'duration' | 'minStay' | 'warning'>
 
@@ -39,11 +49,13 @@ export function computeTimer(config: TimerConfig, now: Date): TimerState {
 
   const remainingMs = Math.max(0, endsAt.getTime() - now.getTime())
   const status: TimerStatus =
-    remainingMs === 0
-      ? 'finished'
-      : remainingMs <= config.warning * MINUTE_MS
-        ? 'warning'
-        : 'running'
+      remainingMs === 0
+          ? 'finished'
+          : remainingMs <= config.red * MINUTE_MS
+              ? 'red'
+              : remainingMs <= config.orange * MINUTE_MS
+                  ? 'orange'
+                  : 'running'
 
   return { status, remainingMs, ...dates }
 }
